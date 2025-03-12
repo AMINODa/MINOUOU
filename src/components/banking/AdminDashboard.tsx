@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import {
   Card,
   CardContent,
@@ -26,6 +26,7 @@ import {
   RefreshCw,
   Bell,
   Shield,
+  AlertCircle,
 } from "lucide-react";
 import { Input } from "../ui/input";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "../ui/tabs";
@@ -47,15 +48,18 @@ export default function AdminDashboard() {
   const [isCustomerDetailsOpen, setIsCustomerDetailsOpen] = useState(false);
   const [searchTerm, setSearchTerm] = useState("");
   const [statusFilter, setStatusFilter] = useState("all");
+  const [customers, setCustomers] = useState([]);
+  const [isLoading, setIsLoading] = useState(true);
 
-  // استرجاع بيانات العملاء من قاعدة البيانات
-  const customers = [
-    ...db.getCustomers(),
-    ...customerService.getAllCustomers(),
-  ].map((customer) => ({
-    ...customer,
-    balance: `${customer.balance.toLocaleString()} د.ج`,
-  }));
+  useEffect(() => {
+    // استرجاع البيانات من قاعدة البيانات
+    setIsLoading(true);
+    setTimeout(() => {
+      // تعيين قائمة فارغة للعملاء
+      setCustomers([]);
+      setIsLoading(false);
+    }, 1000);
+  }, []);
 
   // تطبيق الفلترة على العملاء
   const filteredCustomers = customers.filter((customer) => {
@@ -110,14 +114,14 @@ export default function AdminDashboard() {
           </CardHeader>
           <CardContent>
             <div className="flex items-center justify-between">
-              <div className="text-2xl font-bold">1,248</div>
-              <div className="text-xs text-success flex items-center">
+              <div className="text-2xl font-bold">0</div>
+              <div className="text-xs text-muted-foreground flex items-center">
                 <TrendingUp className="h-3 w-3 mr-1" />
-                +12%
+                0%
               </div>
             </div>
             <div className="text-xs text-muted-foreground mt-1">
-              248 عميل جديد هذا الشهر
+              0 عميل جديد هذا الشهر
             </div>
           </CardContent>
         </Card>
@@ -131,14 +135,14 @@ export default function AdminDashboard() {
           </CardHeader>
           <CardContent>
             <div className="flex items-center justify-between">
-              <div className="text-2xl font-bold">25.4 مليون</div>
-              <div className="text-xs text-success flex items-center">
+              <div className="text-2xl font-bold">0 د.ج</div>
+              <div className="text-xs text-muted-foreground flex items-center">
                 <TrendingUp className="h-3 w-3 mr-1" />
-                +8%
+                0%
               </div>
             </div>
             <div className="text-xs text-muted-foreground mt-1">
-              1.8 مليون زيادة عن الشهر الماضي
+              0 د.ج زيادة عن الشهر الماضي
             </div>
           </CardContent>
         </Card>
@@ -152,14 +156,14 @@ export default function AdminDashboard() {
           </CardHeader>
           <CardContent>
             <div className="flex items-center justify-between">
-              <div className="text-2xl font-bold">876</div>
-              <div className="text-xs text-success flex items-center">
+              <div className="text-2xl font-bold">0</div>
+              <div className="text-xs text-muted-foreground flex items-center">
                 <TrendingUp className="h-3 w-3 mr-1" />
-                +5%
+                0%
               </div>
             </div>
             <div className="text-xs text-muted-foreground mt-1">
-              42 بطاقة جديدة هذا الشهر
+              0 بطاقة جديدة هذا الشهر
             </div>
           </CardContent>
         </Card>
@@ -173,14 +177,14 @@ export default function AdminDashboard() {
           </CardHeader>
           <CardContent>
             <div className="flex items-center justify-between">
-              <div className="text-2xl font-bold">342</div>
-              <div className="text-xs text-success flex items-center">
+              <div className="text-2xl font-bold">0</div>
+              <div className="text-xs text-muted-foreground flex items-center">
                 <TrendingUp className="h-3 w-3 mr-1" />
-                +15%
+                0%
               </div>
             </div>
             <div className="text-xs text-muted-foreground mt-1">
-              52 معاملة في الساعة الأخيرة
+              0 معاملة في الساعة الأخيرة
             </div>
           </CardContent>
         </Card>
@@ -253,84 +257,107 @@ export default function AdminDashboard() {
             </div>
           </div>
 
-          <div className="rounded-md border overflow-hidden bg-white">
-            <div className="hidden md:grid grid-cols-6 bg-muted/50 p-4 font-medium">
-              <div>اسم العميل</div>
-              <div>رقم الحساب</div>
-              <div>البريد الإلكتروني</div>
-              <div>الرصيد</div>
-              <div>الحالة</div>
-              <div className="text-left">الإجراءات</div>
+          {isLoading ? (
+            <div className="flex justify-center items-center p-8">
+              <div className="flex flex-col items-center gap-2">
+                <div className="h-8 w-8 animate-spin rounded-full border-4 border-primary border-r-transparent"></div>
+                <p className="text-sm text-muted-foreground">
+                  جاري تحميل البيانات...
+                </p>
+              </div>
             </div>
+          ) : filteredCustomers.length === 0 ? (
+            <div className="text-center p-8 border rounded-md">
+              <AlertCircle className="h-10 w-10 text-muted-foreground mx-auto mb-2" />
+              <h3 className="font-medium">لا توجد نتائج</h3>
+              <p className="text-sm text-muted-foreground mb-4">
+                لم يتم العثور على أي عملاء مطابقين لمعايير البحث
+              </p>
+            </div>
+          ) : (
+            <div className="rounded-md border overflow-hidden bg-white">
+              <div className="hidden md:grid grid-cols-6 bg-muted/50 p-4 font-medium">
+                <div>اسم العميل</div>
+                <div>رقم الحساب</div>
+                <div>البريد الإلكتروني</div>
+                <div>الرصيد</div>
+                <div>الحالة</div>
+                <div className="text-left">الإجراءات</div>
+              </div>
 
-            <div className="divide-y">
-              {filteredCustomers.map((customer) => (
-                <div
-                  key={customer.id}
-                  className="flex flex-col md:grid md:grid-cols-6 p-4 items-start md:items-center border-b md:border-b-0 hover:bg-muted/10 transition-colors"
-                >
-                  <div className="flex items-center gap-3">
-                    <Avatar className="h-8 w-8 border border-primary/20">
-                      <AvatarFallback className="bg-primary/10 text-primary font-medium text-xs">
-                        {customer.name
-                          .split(" ")
-                          .map((n) => n[0])
-                          .join("")}
-                      </AvatarFallback>
-                    </Avatar>
-                    <div className="font-medium">{customer.name}</div>
+              <div className="divide-y">
+                {filteredCustomers.map((customer) => (
+                  <div
+                    key={customer.id}
+                    className="flex flex-col md:grid md:grid-cols-6 p-4 items-start md:items-center border-b md:border-b-0 hover:bg-muted/10 transition-colors"
+                  >
+                    <div className="flex items-center gap-3">
+                      <Avatar className="h-8 w-8 border border-primary/20">
+                        <AvatarFallback className="bg-primary/10 text-primary font-medium text-xs">
+                          {customer.name
+                            .split(" ")
+                            .map((n) => n[0])
+                            .join("")}
+                        </AvatarFallback>
+                      </Avatar>
+                      <div className="font-medium">{customer.name}</div>
+                    </div>
+                    <div className="text-muted-foreground text-sm mt-1 md:mt-0">
+                      {customer.accountNumber}
+                    </div>
+                    <div className="text-muted-foreground text-sm mt-1 md:mt-0">
+                      {customer.email}
+                    </div>
+                    <div className="font-medium mt-1 md:mt-0">
+                      {customer.balance}
+                    </div>
+                    <div className="flex gap-2 mt-2 md:mt-0">
+                      <Badge
+                        variant={
+                          customer.status === "نشط"
+                            ? "success"
+                            : customer.status === "مجمد"
+                              ? "destructive"
+                              : "outline"
+                        }
+                        className="rounded-full"
+                      >
+                        {customer.status}
+                      </Badge>
+                    </div>
+                    <div className="flex gap-2 mt-3 md:mt-0 md:justify-end">
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        className="h-8 w-8 p-0"
+                        onClick={() => {
+                          setSelectedCustomer(customer);
+                          setIsCustomerDetailsOpen(true);
+                        }}
+                      >
+                        <Eye className="h-4 w-4" />
+                      </Button>
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        className="h-8 w-8 p-0"
+                      >
+                        <Edit className="h-4 w-4" />
+                      </Button>
+                      <Button
+                        variant={
+                          customer.status === "نشط" ? "destructive" : "success"
+                        }
+                        size="sm"
+                      >
+                        {customer.status === "نشط" ? "تعطيل" : "تفعيل"}
+                      </Button>
+                    </div>
                   </div>
-                  <div className="text-muted-foreground text-sm mt-1 md:mt-0">
-                    {customer.accountNumber}
-                  </div>
-                  <div className="text-muted-foreground text-sm mt-1 md:mt-0">
-                    {customer.email}
-                  </div>
-                  <div className="font-medium mt-1 md:mt-0">
-                    {customer.balance}
-                  </div>
-                  <div className="flex gap-2 mt-2 md:mt-0">
-                    <Badge
-                      variant={
-                        customer.status === "نشط"
-                          ? "success"
-                          : customer.status === "مجمد"
-                            ? "destructive"
-                            : "outline"
-                      }
-                      className="rounded-full"
-                    >
-                      {customer.status}
-                    </Badge>
-                  </div>
-                  <div className="flex gap-2 mt-3 md:mt-0 md:justify-end">
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      className="h-8 w-8 p-0"
-                      onClick={() => {
-                        setSelectedCustomer(customer);
-                        setIsCustomerDetailsOpen(true);
-                      }}
-                    >
-                      <Eye className="h-4 w-4" />
-                    </Button>
-                    <Button variant="outline" size="sm" className="h-8 w-8 p-0">
-                      <Edit className="h-4 w-4" />
-                    </Button>
-                    <Button
-                      variant={
-                        customer.status === "نشط" ? "destructive" : "success"
-                      }
-                      size="sm"
-                    >
-                      {customer.status === "نشط" ? "تعطيل" : "تفعيل"}
-                    </Button>
-                  </div>
-                </div>
-              ))}
+                ))}
+              </div>
             </div>
-          </div>
+          )}
 
           <div className="flex items-center justify-between mt-4">
             <div className="text-sm text-muted-foreground">
@@ -382,48 +409,7 @@ export default function AdminDashboard() {
                 </div>
 
                 <div className="divide-y">
-                  {[
-                    {
-                      id: "TX-5421",
-                      customer: "أحمد محمد",
-                      type: "إيداع",
-                      amount: "+15,000 د.ج",
-                      date: "اليوم، 09:45 ص",
-                      status: "success",
-                    },
-                    {
-                      id: "TX-5420",
-                      customer: "سارة خالد",
-                      type: "سحب",
-                      amount: "-5,000 د.ج",
-                      date: "اليوم، 09:30 ص",
-                      status: "success",
-                    },
-                    {
-                      id: "TX-5419",
-                      customer: "محمد علي",
-                      type: "تحويل",
-                      amount: "-12,000 د.ج",
-                      date: "اليوم، 09:15 ص",
-                      status: "success",
-                    },
-                    {
-                      id: "TX-5418",
-                      customer: "فاطمة أحمد",
-                      type: "إيداع",
-                      amount: "+50,000 د.ج",
-                      date: "اليوم، 09:00 ص",
-                      status: "success",
-                    },
-                    {
-                      id: "TX-5417",
-                      customer: "خالد عبدالله",
-                      type: "سحب",
-                      amount: "-8,000 د.ج",
-                      date: "اليوم، 08:45 ص",
-                      status: "success",
-                    },
-                  ].map((transaction) => (
+                  {[].map((transaction) => (
                     <div
                       key={transaction.id}
                       className="flex flex-col md:grid md:grid-cols-5 p-4 items-start md:items-center border-b md:border-b-0 hover:bg-muted/10 transition-colors"
@@ -461,7 +447,7 @@ export default function AdminDashboard() {
 
               <div className="flex items-center justify-between mt-4">
                 <div className="text-sm text-muted-foreground">
-                  عرض 1-5 من 342 معاملة
+                  عرض 0 من 0 معاملة
                 </div>
                 <div className="flex items-center space-x-2 space-x-reverse">
                   <Button variant="outline" size="sm" disabled>
@@ -484,46 +470,7 @@ export default function AdminDashboard() {
             </CardHeader>
             <CardContent className="px-0">
               <div className="space-y-4">
-                {[
-                  {
-                    id: 1,
-                    title: "محاولة دخول مشبوهة",
-                    description:
-                      "تم رصد محاولة دخول غير عادية لحساب العميل محمد علي",
-                    time: "منذ 35 دقيقة",
-                    type: "warning",
-                  },
-                  {
-                    id: 2,
-                    title: "تحديث النظام",
-                    description: "تم تحديث نظام البنك بنجاح إلى الإصدار 2.5.0",
-                    time: "منذ ساعتين",
-                    type: "success",
-                  },
-                  {
-                    id: 3,
-                    title: "معاملة كبيرة",
-                    description:
-                      "تم إجراء معاملة بقيمة 500,000 د.ج من حساب العميل فاطمة أحمد",
-                    time: "منذ 3 ساعات",
-                    type: "info",
-                  },
-                  {
-                    id: 4,
-                    title: "تجاوز حد السحب",
-                    description:
-                      "محاولة سحب تتجاوز الحد اليومي لحساب العميل خالد عبدالله",
-                    time: "منذ 5 ساعات",
-                    type: "warning",
-                  },
-                  {
-                    id: 5,
-                    title: "إنشاء حساب جديد",
-                    description: "تم إنشاء حساب جديد للعميل عمر محمد بنجاح",
-                    time: "منذ 6 ساعات",
-                    type: "success",
-                  },
-                ].map((alert) => (
+                {[].map((alert) => (
                   <div
                     key={alert.id}
                     className="flex items-start p-4 border rounded-lg hover:bg-muted/10 transition-colors"
@@ -562,9 +509,13 @@ export default function AdminDashboard() {
               </div>
             </CardContent>
             <CardFooter className="px-0">
-              <Button variant="outline" className="w-full">
-                عرض جميع التنبيهات
-              </Button>
+              <div className="text-center p-8 border rounded-md">
+                <AlertCircle className="h-10 w-10 text-muted-foreground mx-auto mb-2" />
+                <h3 className="font-medium">لا توجد تنبيهات</h3>
+                <p className="text-sm text-muted-foreground mb-4">
+                  لم يتم العثور على أي تنبيهات في النظام
+                </p>
+              </div>
             </CardFooter>
           </Card>
         </TabsContent>

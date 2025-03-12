@@ -9,6 +9,7 @@ import {
   Wallet,
   AlertCircle,
 } from "lucide-react";
+import OpenNewAccount from "./OpenNewAccount";
 import {
   Card,
   CardContent,
@@ -24,6 +25,7 @@ import { Link } from "react-router-dom";
 export default function Dashboard() {
   const [customer, setCustomer] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [isOpenAccountDialogOpen, setIsOpenAccountDialogOpen] = useState(false);
 
   useEffect(() => {
     // استرجاع بيانات العميل من الجلسة
@@ -159,7 +161,12 @@ export default function Dashboard() {
               <p className="text-sm text-muted-foreground mb-4">
                 لم يتم العثور على أي حسابات مصرفية نشطة في حسابك
               </p>
-              <Button variant="outline">فتح حساب جديد</Button>
+              <Button
+                variant="outline"
+                onClick={() => setIsOpenAccountDialogOpen(true)}
+              >
+                فتح حساب جديد
+              </Button>
             </div>
           )}
 
@@ -271,6 +278,15 @@ export default function Dashboard() {
           </CardFooter>
         )}
       </Card>
+
+      {/* نافذة فتح حساب جديد */}
+      <OpenNewAccount
+        open={isOpenAccountDialogOpen}
+        onOpenChange={setIsOpenAccountDialogOpen}
+        onSuccess={() => {
+          // يمكن إضافة تحديث للبيانات هنا بعد فتح الحساب بنجاح
+        }}
+      />
     </div>
   );
 }

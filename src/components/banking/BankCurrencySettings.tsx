@@ -121,44 +121,50 @@ export default function BankCurrencySettings() {
       return;
     }
 
-    // تحديث أسعار الصرف
-    const updatedRates = currencyRates.map((currency) => {
-      if (currency.id === editingCurrency.id) {
-        const newBuyRate = parseFloat(buyRate);
-        const newSellRate = parseFloat(sellRate);
-        const oldBaseRate = currency.baseRate;
-        const newBaseRate = (newBuyRate + newSellRate) / 2;
-        const trendDirection =
-          newBaseRate > oldBaseRate
-            ? "up"
-            : newBaseRate < oldBaseRate
-              ? "down"
-              : "stable";
-        const trendPercentage =
-          oldBaseRate !== 0
-            ? (((newBaseRate - oldBaseRate) / oldBaseRate) * 100).toFixed(1)
-            : "0";
+    // محاكاة عملية الحفظ في قاعدة البيانات
+    setIsLoading(true);
 
-        return {
-          ...currency,
-          buyRate: newBuyRate,
-          sellRate: newSellRate,
-          baseRate: newBaseRate,
-          lastUpdated: new Date().toISOString(),
-          trend: trendDirection,
-          trendPercentage: `${trendDirection === "up" ? "+" : trendDirection === "down" ? "-" : ""}${Math.abs(parseFloat(trendPercentage))}%`,
-        };
-      }
-      return currency;
-    });
+    setTimeout(() => {
+      // تحديث أسعار الصرف
+      const updatedRates = currencyRates.map((currency) => {
+        if (currency.id === editingCurrency.id) {
+          const newBuyRate = parseFloat(buyRate);
+          const newSellRate = parseFloat(sellRate);
+          const oldBaseRate = currency.baseRate;
+          const newBaseRate = (newBuyRate + newSellRate) / 2;
+          const trendDirection =
+            newBaseRate > oldBaseRate
+              ? "up"
+              : newBaseRate < oldBaseRate
+                ? "down"
+                : "stable";
+          const trendPercentage =
+            oldBaseRate !== 0
+              ? (((newBaseRate - oldBaseRate) / oldBaseRate) * 100).toFixed(1)
+              : "0";
 
-    setCurrencyRates(updatedRates);
-    setEditingCurrency(null);
-    setBuyRate("");
-    setSellRate("");
+          return {
+            ...currency,
+            buyRate: newBuyRate,
+            sellRate: newSellRate,
+            baseRate: newBaseRate,
+            lastUpdated: new Date().toISOString(),
+            trend: trendDirection,
+            trendPercentage: `${trendDirection === "up" ? "+" : trendDirection === "down" ? "-" : ""}${Math.abs(parseFloat(trendPercentage))}%`,
+          };
+        }
+        return currency;
+      });
 
-    // إظهار رسالة نجاح
-    alert("تم تحديث أسعار الصرف بنجاح");
+      setCurrencyRates(updatedRates);
+      setEditingCurrency(null);
+      setBuyRate("");
+      setSellRate("");
+      setIsLoading(false);
+
+      // إظهار رسالة نجاح
+      alert("تم تحديث أسعار الصرف بنجاح");
+    }, 800);
   };
 
   const handleCancelEdit = () => {

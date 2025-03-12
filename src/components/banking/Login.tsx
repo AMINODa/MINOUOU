@@ -23,27 +23,34 @@ export default function Login() {
   const [error, setError] = useState("");
   const navigate = useNavigate();
 
+  const [isLoggingIn, setIsLoggingIn] = useState(false);
+
   const handleLogin = (e: React.FormEvent) => {
     e.preventDefault();
     setError("");
+    setIsLoggingIn(true);
 
-    // التحقق من اسم المستخدم وكلمة المرور للمدير
-    if (username.toLowerCase() === "patron" && password) {
-      // توجيه المدير إلى لوحة التحكم
-      navigate("/admin");
-      return;
-    }
+    // محاكاة عملية تسجيل الدخول مع تأخير لإظهار حالة التحميل
+    setTimeout(() => {
+      // التحقق من اسم المستخدم وكلمة المرور للمدير
+      if (username.toLowerCase() === "patron" && password) {
+        // توجيه المدير إلى لوحة التحكم
+        navigate("/admin");
+        return;
+      }
 
-    // التحقق من اسم المستخدم وكلمة المرور للعملاء
-    const customer = customerService.authenticateCustomer(username, password);
-    if (customer) {
-      // تخزين معلومات العميل في الجلسة
-      sessionStorage.setItem("currentCustomer", JSON.stringify(customer));
-      // توجيه المستخدم العادي إلى الصفحة الرئيسية
-      navigate("/bank");
-    } else {
-      setError("اسم المستخدم أو كلمة المرور غير صحيحة");
-    }
+      // التحقق من اسم المستخدم وكلمة المرور للعملاء
+      const customer = customerService.authenticateCustomer(username, password);
+      if (customer) {
+        // تخزين معلومات العميل في الجلسة
+        sessionStorage.setItem("currentCustomer", JSON.stringify(customer));
+        // توجيه المستخدم العادي إلى الصفحة الرئيسية
+        navigate("/bank");
+      } else {
+        setError("اسم المستخدم أو كلمة المرور غير صحيحة");
+        setIsLoggingIn(false);
+      }
+    }, 1000);
   };
 
   return (
@@ -129,8 +136,15 @@ export default function Login() {
                   تذكرني
                 </Label>
               </div>
-              <Button type="submit" className="w-full">
-                تسجيل الدخول
+              <Button type="submit" className="w-full" disabled={isLoggingIn}>
+                {isLoggingIn ? (
+                  <>
+                    <div className="h-4 w-4 animate-spin rounded-full border-2 border-background border-r-transparent ml-2"></div>
+                    جاري تسجيل الدخول...
+                  </>
+                ) : (
+                  "تسجيل الدخول"
+                )}
               </Button>
             </form>
           </CardContent>
@@ -163,57 +177,6 @@ export default function Login() {
               فتح حساب جديد
             </Button>
           </p>
-        </div>
-
-        <div className="text-center text-xs text-muted-foreground space-y-2">
-          <p>
-            للدخول كمدير، استخدم اسم المستخدم:{" "}
-            <span className="font-semibold">patron</span> وأي كلمة مرور
-          </p>
-          <p className="font-semibold">حسابات العملاء للتجربة:</p>
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 text-left">
-            <div>
-              <p>
-                اسم المستخدم: <span className="font-semibold">ahmed.karim</span>
-              </p>
-              <p>
-                كلمة المرور: <span className="font-semibold">Ahmed123</span>
-              </p>
-            </div>
-            <div>
-              <p>
-                اسم المستخدم:{" "}
-                <span className="font-semibold">fatima.ahmed</span>
-              </p>
-              <p>
-                كلمة المرور: <span className="font-semibold">Fatima123</span>
-              </p>
-            </div>
-            <div>
-              <p>
-                اسم المستخدم: <span className="font-semibold">mohamed.ali</span>
-              </p>
-              <p>
-                كلمة المرور: <span className="font-semibold">Mohamed123</span>
-              </p>
-            </div>
-            <div>
-              <p>
-                اسم المستخدم: <span className="font-semibold">sara.khalid</span>
-              </p>
-              <p>
-                كلمة المرور: <span className="font-semibold">Sara123</span>
-              </p>
-            </div>
-            <div>
-              <p>
-                اسم المستخدم: <span className="font-semibold">khaled.omar</span>
-              </p>
-              <p>
-                كلمة المرور: <span className="font-semibold">Khaled123</span>
-              </p>
-            </div>
-          </div>
         </div>
       </div>
     </div>

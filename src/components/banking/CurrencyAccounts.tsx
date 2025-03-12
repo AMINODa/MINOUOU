@@ -7,6 +7,8 @@ import {
 } from "../ui/card";
 import { Button } from "../ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "../ui/tabs";
+import { useState } from "react";
+import OpenNewAccount from "./OpenNewAccount";
 import {
   DollarSign,
   Euro,
@@ -42,11 +44,12 @@ const foreignAccounts = [
 ];
 
 export default function CurrencyAccounts() {
+  const [isOpenAccountDialogOpen, setIsOpenAccountDialogOpen] = useState(false);
   return (
     <div className="space-y-6">
       <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
         <h1 className="text-3xl font-bold">الحسابات بالعملات الأجنبية</h1>
-        <Button>
+        <Button onClick={() => setIsOpenAccountDialogOpen(true)}>
           <Plus className="h-4 w-4 ml-2" />
           فتح حساب بعملة أجنبية
         </Button>
@@ -140,7 +143,12 @@ export default function CurrencyAccounts() {
               <p className="text-sm text-muted-foreground text-center mb-4">
                 يمكنك فتح حسابات بعملات متعددة للتعاملات الدولية
               </p>
-              <Button variant="outline">فتح حساب جديد</Button>
+              <Button
+                variant="outline"
+                onClick={() => setIsOpenAccountDialogOpen(true)}
+              >
+                فتح حساب جديد
+              </Button>
             </Card>
           </div>
         </TabsContent>
@@ -293,6 +301,15 @@ export default function CurrencyAccounts() {
           </Card>
         </TabsContent>
       </Tabs>
+
+      {/* نافذة فتح حساب بعملة أجنبية */}
+      <OpenNewAccount
+        open={isOpenAccountDialogOpen}
+        onOpenChange={setIsOpenAccountDialogOpen}
+        onSuccess={() => {
+          // يمكن إضافة تحديث للبيانات هنا بعد فتح الحساب بنجاح
+        }}
+      />
     </div>
   );
 }

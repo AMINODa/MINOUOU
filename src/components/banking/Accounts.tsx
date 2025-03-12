@@ -22,6 +22,8 @@ import {
   DropdownMenuTrigger,
 } from "../ui/dropdown-menu";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "../ui/tabs";
+import { useState } from "react";
+import OpenNewAccount from "./OpenNewAccount";
 
 const accounts = [
   {
@@ -70,11 +72,12 @@ const cards = [
 ];
 
 export default function Accounts() {
+  const [isOpenAccountDialogOpen, setIsOpenAccountDialogOpen] = useState(false);
   return (
     <div className="space-y-6">
       <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
         <h1 className="text-3xl font-bold">الحسابات والبطاقات</h1>
-        <Button>
+        <Button onClick={() => setIsOpenAccountDialogOpen(true)}>
           <Plus className="h-4 w-4 ml-2" />
           إضافة حساب جديد
         </Button>
@@ -202,6 +205,15 @@ export default function Accounts() {
           ))}
         </TabsContent>
       </Tabs>
+
+      {/* نافذة فتح حساب جديد */}
+      <OpenNewAccount
+        open={isOpenAccountDialogOpen}
+        onOpenChange={setIsOpenAccountDialogOpen}
+        onSuccess={() => {
+          // يمكن إضافة تحديث للبيانات هنا بعد فتح الحساب بنجاح
+        }}
+      />
     </div>
   );
 }

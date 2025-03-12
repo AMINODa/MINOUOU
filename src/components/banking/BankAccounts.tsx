@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import {
   Card,
   CardContent,
@@ -107,6 +107,17 @@ export default function BankAccounts() {
     useState(false);
   const [copiedField, setCopiedField] = useState("");
   const [selectedCurrency, setSelectedCurrency] = useState("dzd");
+  const [isLoading, setIsLoading] = useState(true);
+  const [accounts, setAccounts] = useState([]);
+
+  useEffect(() => {
+    // استرجاع البيانات من قاعدة البيانات
+    setTimeout(() => {
+      // تعيين قائمة فارغة للحسابات
+      setAccounts([]);
+      setIsLoading(false);
+    }, 1000);
+  }, []);
 
   const handleCopyToClipboard = (text, field) => {
     navigator.clipboard.writeText(text);
@@ -138,7 +149,7 @@ export default function BankAccounts() {
             </p>
           </div>
         </div>
-        <Button onClick={() => handleShowDepositInstructionsOpen("dzd")}>
+        <Button onClick={() => handleShowDepositInstructions("dzd")}>
           عرض تعليمات الإيداع للعملاء
         </Button>
       </div>
@@ -151,113 +162,124 @@ export default function BankAccounts() {
           </CardDescription>
         </CardHeader>
         <CardContent>
-          <div className="rounded-md border overflow-hidden">
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead>اسم الحساب</TableHead>
-                  <TableHead>رقم الحساب</TableHead>
-                  <TableHead>العملة</TableHead>
-                  <TableHead>الرصيد</TableHead>
-                  <TableHead>النوع</TableHead>
-                  <TableHead>الحالة</TableHead>
-                  <TableHead className="text-left">الإجراءات</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {bankAccounts.map((account) => (
-                  <TableRow key={account.id}>
-                    <TableCell className="font-medium">
-                      <div className="flex items-center gap-2">
-                        {account.currency === "دولار أمريكي" ? (
-                          <DollarSign className="h-4 w-4 text-primary" />
-                        ) : account.currency === "يورو" ? (
-                          <Euro className="h-4 w-4 text-primary" />
-                        ) : (
-                          <CreditCard className="h-4 w-4 text-primary" />
-                        )}
-                        {account.name}
-                      </div>
-                    </TableCell>
-                    <TableCell>
-                      <div className="flex items-center gap-1">
-                        <span className="text-sm font-mono">
-                          {account.number.substring(0, 10)}...
-                        </span>
-                        <TooltipProvider>
-                          <Tooltip>
-                            <TooltipTrigger asChild>
-                              <Button
-                                variant="ghost"
-                                size="icon"
-                                className="h-6 w-6"
-                                onClick={() =>
-                                  handleCopyToClipboard(
-                                    account.number,
-                                    `number-${account.id}`,
-                                  )
-                                }
-                              >
-                                {copiedField === `number-${account.id}` ? (
-                                  <Check className="h-3 w-3 text-success" />
-                                ) : (
-                                  <Copy className="h-3 w-3 text-muted-foreground" />
-                                )}
-                              </Button>
-                            </TooltipTrigger>
-                            <TooltipContent>
-                              <p>نسخ رقم الحساب</p>
-                            </TooltipContent>
-                          </Tooltip>
-                        </TooltipProvider>
-                      </div>
-                    </TableCell>
-                    <TableCell>{account.currency}</TableCell>
-                    <TableCell className="font-medium">
-                      {account.balance}
-                    </TableCell>
-                    <TableCell>{account.type}</TableCell>
-                    <TableCell>
-                      <Badge
-                        variant={
-                          account.status === "نشط" ? "success" : "destructive"
-                        }
-                        className="rounded-full"
-                      >
-                        {account.status}
-                      </Badge>
-                    </TableCell>
-                    <TableCell>
-                      <div className="flex gap-2">
-                        <Button
-                          variant="outline"
-                          size="sm"
-                          onClick={() => handleShowDetails(account)}
-                        >
-                          عرض التفاصيل
-                        </Button>
-                        <Button
-                          variant="outline"
-                          size="sm"
-                          onClick={() =>
-                            handleShowDepositInstructions(
-                              account.currency === "دينار جزائري"
-                                ? "dzd"
-                                : account.currency === "دولار أمريكي"
-                                  ? "usd"
-                                  : "eur",
-                            )
-                          }
-                        >
-                          تعليمات الإيداع
-                        </Button>
-                      </div>
-                    </TableCell>
+          {isLoading ? (
+            <div className="flex justify-center items-center p-8">
+              <div className="flex flex-col items-center gap-2">
+                <div className="h-8 w-8 animate-spin rounded-full border-4 border-primary border-r-transparent"></div>
+                <p className="text-sm text-muted-foreground">
+                  جاري تحميل البيانات...
+                </p>
+              </div>
+            </div>
+          ) : (
+            <div className="rounded-md border overflow-hidden">
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead>اسم الحساب</TableHead>
+                    <TableHead>رقم الحساب</TableHead>
+                    <TableHead>العملة</TableHead>
+                    <TableHead>الرصيد</TableHead>
+                    <TableHead>النوع</TableHead>
+                    <TableHead>الحالة</TableHead>
+                    <TableHead className="text-left">الإجراءات</TableHead>
                   </TableRow>
-                ))}
-              </TableBody>
-            </Table>
-          </div>
+                </TableHeader>
+                <TableBody>
+                  {accounts.map((account) => (
+                    <TableRow key={account.id}>
+                      <TableCell className="font-medium">
+                        <div className="flex items-center gap-2">
+                          {account.currency === "دولار أمريكي" ? (
+                            <DollarSign className="h-4 w-4 text-primary" />
+                          ) : account.currency === "يورو" ? (
+                            <Euro className="h-4 w-4 text-primary" />
+                          ) : (
+                            <CreditCard className="h-4 w-4 text-primary" />
+                          )}
+                          {account.name}
+                        </div>
+                      </TableCell>
+                      <TableCell>
+                        <div className="flex items-center gap-1">
+                          <span className="text-sm font-mono">
+                            {account.number.substring(0, 10)}...
+                          </span>
+                          <TooltipProvider>
+                            <Tooltip>
+                              <TooltipTrigger asChild>
+                                <Button
+                                  variant="ghost"
+                                  size="icon"
+                                  className="h-6 w-6"
+                                  onClick={() =>
+                                    handleCopyToClipboard(
+                                      account.number,
+                                      `number-${account.id}`,
+                                    )
+                                  }
+                                >
+                                  {copiedField === `number-${account.id}` ? (
+                                    <Check className="h-3 w-3 text-success" />
+                                  ) : (
+                                    <Copy className="h-3 w-3 text-muted-foreground" />
+                                  )}
+                                </Button>
+                              </TooltipTrigger>
+                              <TooltipContent>
+                                <p>نسخ رقم الحساب</p>
+                              </TooltipContent>
+                            </Tooltip>
+                          </TooltipProvider>
+                        </div>
+                      </TableCell>
+                      <TableCell>{account.currency}</TableCell>
+                      <TableCell className="font-medium">
+                        {account.balance}
+                      </TableCell>
+                      <TableCell>{account.type}</TableCell>
+                      <TableCell>
+                        <Badge
+                          variant={
+                            account.status === "نشط" ? "success" : "destructive"
+                          }
+                          className="rounded-full"
+                        >
+                          {account.status}
+                        </Badge>
+                      </TableCell>
+                      <TableCell>
+                        <div className="flex gap-2">
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() => handleShowDetails(account)}
+                          >
+                            عرض التفاصيل
+                          </Button>
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() =>
+                              handleShowDepositInstructions(
+                                account.currency === "دينار جزائري"
+                                  ? "dzd"
+                                  : account.currency === "دولار أمريكي"
+                                    ? "usd"
+                                    : "eur",
+                              )
+                            }
+                          >
+                            تعليمات الإيداع
+                          </Button>
+                        </div>
+                      </TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+            </div>
+          )}
         </CardContent>
       </Card>
 

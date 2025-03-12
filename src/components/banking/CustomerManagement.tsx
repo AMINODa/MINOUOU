@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import {
   Card,
   CardContent,
@@ -28,6 +28,7 @@ import {
   CheckCircle,
   XCircle,
   Shield,
+  AlertCircle,
 } from "lucide-react";
 import { Badge } from "../ui/badge";
 import { Avatar, AvatarFallback } from "../ui/avatar";
@@ -52,15 +53,18 @@ export default function CustomerManagement() {
   const [customerToDelete, setCustomerToDelete] = useState(null);
   const [searchTerm, setSearchTerm] = useState("");
   const [statusFilter, setStatusFilter] = useState("all");
+  const [customers, setCustomers] = useState([]);
+  const [isLoading, setIsLoading] = useState(true);
 
-  // استرجاع بيانات العملاء من قاعدة البيانات
-  const customers = [
-    ...db.getCustomers(),
-    ...customerService.getAllCustomers(),
-  ].map((customer) => ({
-    ...customer,
-    balance: `${customer.balance.toLocaleString()} د.ج`,
-  }));
+  useEffect(() => {
+    // استرجاع البيانات من قاعدة البيانات
+    setIsLoading(true);
+    setTimeout(() => {
+      // تعيين قائمة فارغة للعملاء
+      setCustomers([]);
+      setIsLoading(false);
+    }, 1000);
+  }, []);
 
   // تطبيق الفلترة على العملاء
   const filteredCustomers = customers.filter((customer) => {
@@ -77,18 +81,44 @@ export default function CustomerManagement() {
   });
 
   const handleDeleteCustomer = () => {
-    // في التطبيق الحقيقي، هنا سيتم حذف العميل من قاعدة البيانات
-    console.log("حذف العميل:", customerToDelete);
-    alert(`تم حذف العميل ${customerToDelete.name} بنجاح`);
+    // محاكاة حذف العميل من قاعدة البيانات
+    setIsLoading(true);
     setIsDeleteDialogOpen(false);
-    setCustomerToDelete(null);
+
+    setTimeout(() => {
+      // حذف العميل من القائمة المحلية
+      const updatedCustomers = customers.filter(
+        (c) => c.id !== customerToDelete.id,
+      );
+      setCustomers(updatedCustomers);
+      setCustomerToDelete(null);
+      setIsLoading(false);
+
+      // إظهار رسالة نجاح
+      alert(`تم حذف العميل ${customerToDelete.name} بنجاح`);
+    }, 800);
   };
 
   const handleToggleStatus = (customer) => {
-    // في التطبيق الحقيقي، هنا سيتم تغيير حالة العميل في قاعدة البيانات
+    // محاكاة تغيير حالة العميل في قاعدة البيانات
+    setIsLoading(true);
     const newStatus = customer.status === "نشط" ? "مجمد" : "نشط";
-    console.log("تغيير حالة العميل:", customer.id, "إلى", newStatus);
-    alert(`تم تغيير حالة العميل ${customer.name} إلى ${newStatus} بنجاح`);
+
+    setTimeout(() => {
+      // تحديث حالة العميل في القائمة المحلية
+      const updatedCustomers = customers.map((c) => {
+        if (c.id === customer.id) {
+          return { ...c, status: newStatus };
+        }
+        return c;
+      });
+
+      setCustomers(updatedCustomers);
+      setIsLoading(false);
+
+      // إظهار رسالة نجاح
+      alert(`تم تغيير حالة العميل ${customer.name} إلى ${newStatus} بنجاح`);
+    }, 800);
   };
 
   return (
@@ -159,104 +189,123 @@ export default function CustomerManagement() {
             </div>
           </div>
 
-          <div className="rounded-md border overflow-hidden bg-white">
-            <div className="hidden md:grid grid-cols-6 bg-muted/50 p-4 font-medium">
-              <div>اسم العميل</div>
-              <div>رقم الحساب</div>
-              <div>البريد الإلكتروني</div>
-              <div>الرصيد</div>
-              <div>الحالة</div>
-              <div className="text-left">الإجراءات</div>
+          {isLoading ? (
+            <div className="flex justify-center items-center p-8">
+              <div className="flex flex-col items-center gap-2">
+                <div className="h-8 w-8 animate-spin rounded-full border-4 border-primary border-r-transparent"></div>
+                <p className="text-sm text-muted-foreground">
+                  جاري تحميل البيانات...
+                </p>
+              </div>
             </div>
+          ) : filteredCustomers.length === 0 ? (
+            <div className="text-center p-8 border rounded-md">
+              <AlertCircle className="h-10 w-10 text-muted-foreground mx-auto mb-2" />
+              <h3 className="font-medium">لا توجد نتائج</h3>
+              <p className="text-sm text-muted-foreground mb-4">
+                لم يتم العثور على أي عملاء مطابقين لمعايير البحث
+              </p>
+            </div>
+          ) : (
+            <div className="rounded-md border overflow-hidden bg-white">
+              <div className="hidden md:grid grid-cols-6 bg-muted/50 p-4 font-medium">
+                <div>اسم العميل</div>
+                <div>رقم الحساب</div>
+                <div>البريد الإلكتروني</div>
+                <div>الرصيد</div>
+                <div>الحالة</div>
+                <div className="text-left">الإجراءات</div>
+              </div>
 
-            <div className="divide-y">
-              {filteredCustomers.map((customer) => (
-                <div
-                  key={customer.id}
-                  className="flex flex-col md:grid md:grid-cols-6 p-4 items-start md:items-center border-b md:border-b-0 hover:bg-muted/10 transition-colors"
-                >
-                  <div className="flex items-center gap-3">
-                    <Avatar className="h-8 w-8 border border-primary/20">
-                      <AvatarFallback className="bg-primary/10 text-primary font-medium text-xs">
-                        {customer.name
-                          .split(" ")
-                          .map((n) => n[0])
-                          .join("")}
-                      </AvatarFallback>
-                    </Avatar>
-                    <div className="font-medium">{customer.name}</div>
+              <div className="divide-y">
+                {filteredCustomers.map((customer) => (
+                  <div
+                    key={customer.id}
+                    className="flex flex-col md:grid md:grid-cols-6 p-4 items-start md:items-center border-b md:border-b-0 hover:bg-muted/10 transition-colors"
+                  >
+                    <div className="flex items-center gap-3">
+                      <Avatar className="h-8 w-8 border border-primary/20">
+                        <AvatarFallback className="bg-primary/10 text-primary font-medium text-xs">
+                          {customer.name
+                            .split(" ")
+                            .map((n) => n[0])
+                            .join("")}
+                        </AvatarFallback>
+                      </Avatar>
+                      <div className="font-medium">{customer.name}</div>
+                    </div>
+                    <div className="text-muted-foreground text-sm mt-1 md:mt-0">
+                      {customer.accountNumber}
+                    </div>
+                    <div className="text-muted-foreground text-sm mt-1 md:mt-0">
+                      {customer.email}
+                    </div>
+                    <div className="font-medium mt-1 md:mt-0">
+                      {customer.balance}
+                    </div>
+                    <div className="flex gap-2 mt-2 md:mt-0">
+                      <Badge
+                        variant={
+                          customer.status === "نشط"
+                            ? "success"
+                            : customer.status === "مجمد"
+                              ? "destructive"
+                              : "outline"
+                        }
+                        className="rounded-full"
+                      >
+                        {customer.status}
+                      </Badge>
+                    </div>
+                    <div className="flex gap-2 mt-3 md:mt-0 md:justify-end">
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        className="h-8 w-8 p-0"
+                        onClick={() => {
+                          setSelectedCustomer(customer);
+                          setIsCustomerDetailsOpen(true);
+                        }}
+                      >
+                        <Eye className="h-4 w-4" />
+                      </Button>
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        className="h-8 w-8 p-0"
+                        onClick={() => {
+                          setSelectedCustomer(customer);
+                          setIsCustomerDetailsOpen(true);
+                        }}
+                      >
+                        <Edit className="h-4 w-4" />
+                      </Button>
+                      <Button
+                        variant={
+                          customer.status === "نشط" ? "destructive" : "success"
+                        }
+                        size="sm"
+                        onClick={() => handleToggleStatus(customer)}
+                      >
+                        {customer.status === "نشط" ? "تجميد" : "تنشيط"}
+                      </Button>
+                      <Button
+                        variant="destructive"
+                        size="sm"
+                        className="h-8 w-8 p-0"
+                        onClick={() => {
+                          setCustomerToDelete(customer);
+                          setIsDeleteDialogOpen(true);
+                        }}
+                      >
+                        <Trash2 className="h-4 w-4" />
+                      </Button>
+                    </div>
                   </div>
-                  <div className="text-muted-foreground text-sm mt-1 md:mt-0">
-                    {customer.accountNumber}
-                  </div>
-                  <div className="text-muted-foreground text-sm mt-1 md:mt-0">
-                    {customer.email}
-                  </div>
-                  <div className="font-medium mt-1 md:mt-0">
-                    {customer.balance}
-                  </div>
-                  <div className="flex gap-2 mt-2 md:mt-0">
-                    <Badge
-                      variant={
-                        customer.status === "نشط"
-                          ? "success"
-                          : customer.status === "مجمد"
-                            ? "destructive"
-                            : "outline"
-                      }
-                      className="rounded-full"
-                    >
-                      {customer.status}
-                    </Badge>
-                  </div>
-                  <div className="flex gap-2 mt-3 md:mt-0 md:justify-end">
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      className="h-8 w-8 p-0"
-                      onClick={() => {
-                        setSelectedCustomer(customer);
-                        setIsCustomerDetailsOpen(true);
-                      }}
-                    >
-                      <Eye className="h-4 w-4" />
-                    </Button>
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      className="h-8 w-8 p-0"
-                      onClick={() => {
-                        setSelectedCustomer(customer);
-                        setIsCustomerDetailsOpen(true);
-                      }}
-                    >
-                      <Edit className="h-4 w-4" />
-                    </Button>
-                    <Button
-                      variant={
-                        customer.status === "نشط" ? "destructive" : "success"
-                      }
-                      size="sm"
-                      onClick={() => handleToggleStatus(customer)}
-                    >
-                      {customer.status === "نشط" ? "تجميد" : "تنشيط"}
-                    </Button>
-                    <Button
-                      variant="destructive"
-                      size="sm"
-                      className="h-8 w-8 p-0"
-                      onClick={() => {
-                        setCustomerToDelete(customer);
-                        setIsDeleteDialogOpen(true);
-                      }}
-                    >
-                      <Trash2 className="h-4 w-4" />
-                    </Button>
-                  </div>
-                </div>
-              ))}
+                ))}
+              </div>
             </div>
-          </div>
+          )}
 
           <div className="flex items-center justify-between mt-4">
             <div className="text-sm text-muted-foreground">
@@ -326,8 +375,28 @@ export default function CustomerManagement() {
             </Button>
             <Button
               onClick={() => {
-                alert("تم إنشاء حساب العميل بنجاح");
+                setIsLoading(true);
                 setIsAddCustomerOpen(false);
+
+                // محاكاة إضافة عميل جديد
+                setTimeout(() => {
+                  const newCustomer = {
+                    id: Math.max(...customers.map((c) => c.id)) + 1,
+                    name: document.getElementById("name").value || "عميل جديد",
+                    accountNumber: `**** ${Math.floor(1000 + Math.random() * 9000)}`,
+                    balance: "0 د.ج",
+                    status: "نشط",
+                    email:
+                      document.getElementById("email").value ||
+                      "new@example.com",
+                    phone:
+                      document.getElementById("phone").value || "05XXXXXXXX",
+                  };
+
+                  setCustomers([...customers, newCustomer]);
+                  setIsLoading(false);
+                  alert("تم إنشاء حساب العميل بنجاح");
+                }, 1000);
               }}
             >
               إنشاء الحساب
