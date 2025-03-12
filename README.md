@@ -1,30 +1,97 @@
-# React + TypeScript + Vite
+# بنك الأمان - نظام إدارة البنك الإلكتروني
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+## نظرة عامة
 
-Currently, two official plugins are available:
+نظام إدارة البنك الإلكتروني هو تطبيق ويب متكامل لإدارة الحسابات المصرفية باللغة العربية. يتضمن وظائف متعددة مثل لوحة التحكم، وإدارة الحسابات، وفتح حسابات جديدة، وعرض المعاملات.
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react/README.md) uses [Babel](https://babeljs.io/) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+## الميزات الرئيسية
 
-## Expanding the ESLint configuration
+- واجهة مستخدم باللغة العربية
+- إدارة حسابات العملاء
+- تحويلات مالية بين الحسابات
+- إدارة العملات الأجنبية
+- أهداف ادخار
+- لوحة تحكم للمدير
+- إدارة البطاقات المصرفية
 
-If you are developing a production application, we recommend updating the configuration to enable type aware lint rules:
+## متطلبات النظام
 
-- Configure the top-level `parserOptions` property like this:
+- Node.js (الإصدار 18 أو أحدث)
+- Supabase (لقاعدة البيانات)
 
-```js
-export default {
-  // other rules...
-  parserOptions: {
-    ecmaVersion: 'latest',
-    sourceType: 'module',
-    project: ['./tsconfig.json', './tsconfig.node.json'],
-    tsconfigRootDir: __dirname,
-  },
-}
+## إعداد المشروع
+
+### 1. تثبيت التبعيات
+
+```bash
+npm install
 ```
 
-- Replace `plugin:@typescript-eslint/recommended` to `plugin:@typescript-eslint/recommended-type-checked` or `plugin:@typescript-eslint/strict-type-checked`
-- Optionally add `plugin:@typescript-eslint/stylistic-type-checked`
-- Install [eslint-plugin-react](https://github.com/jsx-eslint/eslint-plugin-react) and add `plugin:react/recommended` & `plugin:react/jsx-runtime` to the `extends` list
+### 2. إعداد متغيرات البيئة
+
+قم بإنشاء ملف `.env` في المجلد الرئيسي للمشروع وأضف المتغيرات التالية:
+
+```
+VITE_SUPABASE_URL=your_supabase_url
+VITE_SUPABASE_ANON_KEY=your_supabase_anon_key
+```
+
+### 3. تشغيل المشروع
+
+```bash
+npm run dev
+```
+
+## هيكل قاعدة البيانات
+
+### جدول العملاء (customers)
+- id: المعرف الفريد
+- name: اسم العميل
+- email: البريد الإلكتروني
+- phone: رقم الهاتف
+- address: العنوان
+- id_number: رقم الهوية
+- dob: تاريخ الميلاد
+- status: حالة العميل (نشط، مجمد، مغلق)
+- security_level: مستوى الأمان
+- transaction_limit: حد المعاملات
+- two_factor_enabled: تفعيل المصادقة الثنائية
+- username: اسم المستخدم
+- password: كلمة المرور
+
+### جدول الحسابات (accounts)
+- id: المعرف الفريد
+- customer_id: معرف العميل
+- account_number: رقم الحساب
+- type: نوع الحساب (جاري، توفير، استثمار)
+- currency: العملة
+- balance: الرصيد
+- status: حالة الحساب
+
+### جدول المعاملات (transactions)
+- id: المعرف الفريد
+- account_id: معرف الحساب
+- type: نوع المعاملة (إيداع، سحب، تحويل)
+- amount: المبلغ
+- description: الوصف
+- status: حالة المعاملة
+- recipient_account_id: معرف الحساب المستلم (للتحويلات)
+
+### جدول أسعار العملات (currency_rates)
+- id: المعرف الفريد
+- code: رمز العملة
+- name: اسم العملة
+- symbol: رمز العملة
+- base_rate: السعر الأساسي
+- buy_rate: سعر الشراء
+- sell_rate: سعر البيع
+- is_base: هل هي العملة الأساسية
+
+### جدول أهداف الادخار (savings_goals)
+- id: المعرف الفريد
+- customer_id: معرف العميل
+- title: عنوان الهدف
+- current_amount: المبلغ الحالي
+- target_amount: المبلغ المستهدف
+- target_date: تاريخ الاستحقاق
+- monthly_contribution: المساهمة الشهرية
