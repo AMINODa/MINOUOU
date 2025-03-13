@@ -14,6 +14,7 @@ import { Label } from "../ui/label";
 import { Checkbox } from "../ui/checkbox";
 import { Eye, EyeOff, Lock, User, Shield, AlertCircle } from "lucide-react";
 import { customerService } from "@/lib/customers";
+import { supabase } from "@/lib/supabase";
 import { Alert, AlertDescription } from "../ui/alert";
 
 export default function Login() {
@@ -25,13 +26,12 @@ export default function Login() {
 
   const [isLoggingIn, setIsLoggingIn] = useState(false);
 
-  const handleLogin = (e: React.FormEvent) => {
+  const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     setError("");
     setIsLoggingIn(true);
 
-    // محاكاة عملية تسجيل الدخول مع تأخير لإظهار حالة التحميل
-    setTimeout(() => {
+    try {
       // التحقق من اسم المستخدم وكلمة المرور للمدير
       if (username.toLowerCase() === "patron" && password) {
         // توجيه المدير إلى لوحة التحكم
@@ -39,18 +39,45 @@ export default function Login() {
         return;
       }
 
-      // التحقق من اسم المستخدم وكلمة المرور للعملاء
-      const customer = customerService.authenticateCustomer(username, password);
-      if (customer) {
-        // تخزين معلومات العميل في الجلسة
-        sessionStorage.setItem("currentCustomer", JSON.stringify(customer));
-        // توجيه المستخدم العادي إلى الصفحة الرئيسية
-        navigate("/bank");
+      // محاولة التحقق من اسم المستخدم وكلمة المرور من Supabase
+      const { data, error } = await supabase
+        .from("customers")
+        .select("*")
+        .eq("username", username)
+        .single();
+
+      if (error) {
+        console.error("Supabase error:", error);
+        // إذا لم يتم العثور على المستخدم في Supabase، نستخدم البيانات المحلية
+        const customer = customerService.authenticateCustomer(
+          username,
+          password,
+        );
+        if (customer) {
+          // تخزين معلومات العميل في الجلسة
+          sessionStorage.setItem("currentCustomer", JSON.stringify(customer));
+          // توجيه المستخدم العادي إلى الصفحة الرئيسية
+          navigate("/bank");
+        } else {
+          setError("اسم المستخدم أو كلمة المرور غير صحيحة");
+        }
       } else {
-        setError("اسم المستخدم أو كلمة المرور غير صحيحة");
-        setIsLoggingIn(false);
+        // التحقق من كلمة المرور
+        if (data.password === password) {
+          // تخزين معلومات العميل في الجلسة
+          sessionStorage.setItem("currentCustomer", JSON.stringify(data));
+          // توجيه المستخدم العادي إلى الصفحة الرئيسية
+          navigate("/bank");
+        } else {
+          setError("اسم المستخدم أو كلمة المرور غير صحيحة");
+        }
       }
-    }, 1000);
+    } catch (err) {
+      console.error("Login error:", err);
+      setError("حدث خطأ أثناء تسجيل الدخول. يرجى المحاولة مرة أخرى.");
+    } finally {
+      setIsLoggingIn(false);
+    }
   };
 
   return (
@@ -173,7 +200,11 @@ export default function Login() {
         <div className="text-center text-sm">
           <p className="text-muted-foreground">
             ليس لديك حساب؟{" "}
-            <Button variant="link" className="h-auto p-0">
+            <Button
+              variant="link"
+              className="h-auto p-0"
+              onClick={() => navigate("/register")}
+            >
               فتح حساب جديد
             </Button>
           </p>

@@ -2,6 +2,7 @@ import { Suspense } from "react";
 import { useRoutes, Routes, Route } from "react-router-dom";
 import Home from "./components/home";
 import Login from "./components/banking/Login";
+import Register from "./components/banking/Register";
 import BankLayout from "./components/banking/BankLayout";
 import AdminLayout from "./components/banking/AdminLayout";
 import Dashboard from "./components/banking/Dashboard";
@@ -16,6 +17,8 @@ import CustomerManagement from "./components/banking/CustomerManagement";
 import BankCurrencySettings from "./components/banking/BankCurrencySettings";
 import BankAccounts from "./components/banking/BankAccounts";
 import CustomerDepositInstructions from "./components/banking/CustomerDepositInstructions";
+import ConnectionTest from "./components/banking/ConnectionTest";
+import { DebugPanel } from "./components/ui/debug-panel";
 import routes from "tempo-routes";
 
 function App() {
@@ -24,6 +27,8 @@ function App() {
       <>
         <Routes>
           <Route path="/" element={<Login />} />
+          <Route path="/register" element={<Register />} />
+          <Route path="/connection-test" element={<ConnectionTest />} />
 
           {/* مسارات العميل */}
           <Route path="/bank" element={<BankLayout />}>
@@ -59,6 +64,7 @@ function App() {
           )}
         </Routes>
         {import.meta.env.VITE_TEMPO === "true" && useRoutes(routes)}
+        <DebugPanel />
       </>
     </Suspense>
   );

@@ -1,15 +1,5 @@
-import { useEffect, useState } from "react";
-import {
-  CreditCard,
-  TrendingUp,
-  TrendingDown,
-  DollarSign,
-  Calendar,
-  Euro,
-  Wallet,
-  AlertCircle,
-} from "lucide-react";
-import OpenNewAccount from "./OpenNewAccount";
+import { useState, useEffect } from "react";
+import { Link } from "react-router-dom";
 import {
   Card,
   CardContent,
@@ -20,95 +10,139 @@ import {
 } from "../ui/card";
 import { Button } from "../ui/button";
 import { Alert, AlertDescription } from "../ui/alert";
-import { Link } from "react-router-dom";
+import {
+  CreditCard,
+  DollarSign,
+  TrendingUp,
+  Calendar,
+  AlertCircle,
+  PiggyBank,
+  CreditCard as VisaIcon,
+} from "lucide-react";
+import OpenNewAccount from "./OpenNewAccount";
+import { supabase } from "@/lib/supabase";
+import { useToast } from "../ui/use-toast";
 
 export default function Dashboard() {
-  const [customer, setCustomer] = useState(null);
-  const [loading, setLoading] = useState(true);
   const [isOpenAccountDialogOpen, setIsOpenAccountDialogOpen] = useState(false);
+  const [customer, setCustomer] = useState({
+    id: 0,
+    name: "",
+    balance: 0,
+    accounts: [],
+  });
+  const [isLoading, setIsLoading] = useState(true);
+  const { toast } = useToast();
 
-  useEffect(() => {
-    // استرجاع بيانات العميل من الجلسة
-    const storedCustomer = sessionStorage.getItem("currentCustomer");
-    if (storedCustomer) {
-      setCustomer(JSON.parse(storedCustomer));
+  // استرجاع بيانات العميل من قاعدة البيانات
+  const fetchCustomerData = async () => {
+    setIsLoading(true);
+    try {
+      // استرجاع بيانات العميل من الجلسة
+      const storedCustomer = sessionStorage.getItem("currentCustomer");
+      if (!storedCustomer) {
+        // إذا لم يتم العثور على بيانات العميل، استخدم بيانات افتراضية للعرض
+        setCustomer({
+          id: 101, // معرف افتراضي
+          name: "أحمد محمد",
+          balance: 0,
+          accounts: [],
+        });
+        setIsLoading(false);
+        return;
+      }
+
+      const customerData = JSON.parse(storedCustomer);
+
+      // استرجاع حسابات العميل من قاعدة البيانات
+      const { data: accounts, error: accountsError } = await supabase
+        .from("accounts")
+        .select("*")
+        .eq("customer_id", customerData.id);
+
+      if (accountsError) throw accountsError;
+
+      // حساب إجمالي الرصيد من جميع الحسابات
+      let totalBalance = 0;
+      if (accounts && accounts.length > 0) {
+        // حساب الرصيد الإجمالي بالدينار الجزائري
+        accounts.forEach((account) => {
+          if (account.currency === "دينار جزائري") {
+            totalBalance += account.balance;
+          } else if (account.currency === "دولار أمريكي") {
+            // تحويل الدولار إلى دينار (سعر تقريبي)
+            totalBalance += account.balance * 135.5;
+          } else if (account.currency === "يورو") {
+            // تحويل اليورو إلى دينار (سعر تقريبي)
+            totalBalance += account.balance * 148.2;
+          }
+        });
+      }
+
+      setCustomer({
+        ...customerData,
+        balance: totalBalance,
+        accounts: accounts || [],
+      });
+    } catch (error) {
+      console.error("Error fetching customer data:", error);
+      toast({
+        title: "خطأ",
+        description: "حدث خطأ أثناء استرجاع بيانات العميل",
+        variant: "destructive",
+      });
+    } finally {
+      setIsLoading(false);
     }
-    setLoading(false);
-  }, []);
-
-  if (loading) {
-    return <div>جاري التحميل...</div>;
-  }
-
-  if (!customer) {
-    return (
-      <div className="space-y-6">
-        <Alert variant="destructive">
-          <AlertCircle className="h-4 w-4" />
-          <AlertDescription>
-            لم يتم العثور على بيانات العميل. الرجاء{" "}
-            <Link to="/" className="underline font-bold">
-              تسجيل الدخول
-            </Link>{" "}
-            مرة أخرى.
-          </AlertDescription>
-        </Alert>
-      </div>
-    );
-  }
+  };
 
   // تنسيق الرصيد
   const formatBalance = (balance) => {
     return balance.toLocaleString();
   };
 
+  // استرجاع البيانات عند تحميل المكون
+  useEffect(() => {
+    fetchCustomerData();
+  }, []);
+
   return (
     <div className="space-y-6">
-      <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-2">
-        <h1 className="text-2xl md:text-3xl font-bold">
-          مرحباً، {customer.name.split(" ")[0]}
-        </h1>
-        <div className="flex items-center gap-2">
-          <span className="text-sm text-muted-foreground">آخر تحديث:</span>
-          <span className="text-sm font-medium">
-            {new Date().toLocaleString("ar-DZ", {
-              hour: "2-digit",
-              minute: "2-digit",
-            })}
-          </span>
-        </div>
-      </div>
+      <h1 className="text-3xl font-bold">لوحة التحكم</h1>
 
-      {/* بطاقة الرصيد الإجمالي */}
-      <Card className="bg-gradient-to-r from-primary to-primary/60 text-white border-0 shadow-md overflow-hidden">
-        <CardHeader className="pb-2">
-          <CardTitle className="flex items-center gap-2">
-            <Wallet className="h-5 w-5" />
-            الرصيد الإجمالي
-          </CardTitle>
+      <Card className="bg-gradient-to-r from-primary to-primary/80 text-white">
+        <CardHeader>
+          <CardTitle>مرحباً، {customer.name}</CardTitle>
+          <CardDescription className="text-primary-foreground/80">
+            نظرة عامة على حساباتك المصرفية
+          </CardDescription>
         </CardHeader>
         <CardContent>
-          <div className="mb-4">
-            <p className="text-sm opacity-80">الدينار الجزائري</p>
-            <p className="text-2xl font-bold">
-              {formatBalance(customer.balance)} د.ج
-            </p>
-          </div>
-
-          <div className="grid grid-cols-2 gap-2 bg-white/10 rounded-lg p-3">
-            <div>
-              <p className="text-xs opacity-80">دولار أمريكي</p>
-              <div className="flex items-center gap-1">
-                <DollarSign className="h-3 w-3" />
-                <p className="font-bold">0</p>
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+            <div className="bg-white/10 p-4 rounded-lg">
+              <div className="flex items-center gap-2 mb-2">
+                <DollarSign className="h-5 w-5" />
+                <h3 className="font-medium">الرصيد الإجمالي</h3>
               </div>
+              <p className="text-2xl font-bold">
+                {formatBalance(customer.balance)} د.ج
+              </p>
             </div>
-            <div>
-              <p className="text-xs opacity-80">يورو</p>
-              <div className="flex items-center gap-1">
-                <Euro className="h-3 w-3" />
-                <p className="font-bold">0</p>
+            <div className="bg-white/10 p-4 rounded-lg">
+              <div className="flex items-center gap-2 mb-2">
+                <CreditCard className="h-5 w-5" />
+                <h3 className="font-medium">عدد الحسابات</h3>
               </div>
+              <p className="text-2xl font-bold">
+                {customer.accounts ? customer.accounts.length : 0}
+              </p>
+            </div>
+            <div className="bg-white/10 p-4 rounded-lg">
+              <div className="flex items-center gap-2 mb-2">
+                <PiggyBank className="h-5 w-5" />
+                <h3 className="font-medium">أهداف الادخار</h3>
+              </div>
+              <p className="font-bold">0</p>
             </div>
           </div>
         </CardContent>
@@ -143,13 +177,18 @@ export default function Dashboard() {
                   <div>
                     <h3 className="font-medium">{account.type}</h3>
                     <p className="text-sm text-muted-foreground">
-                      {account.number.substring(0, 8)}...
+                      {account.account_number.substring(0, 8)}...
                     </p>
                   </div>
                 </div>
                 <div className="text-right">
                   <p className="font-bold">
-                    {formatBalance(account.balance)} د.ج
+                    {formatBalance(account.balance)}{" "}
+                    {account.currency === "دينار جزائري"
+                      ? "د.ج"
+                      : account.currency === "دولار أمريكي"
+                        ? "$"
+                        : "€"}
                   </p>
                 </div>
               </div>
@@ -284,8 +323,14 @@ export default function Dashboard() {
         open={isOpenAccountDialogOpen}
         onOpenChange={setIsOpenAccountDialogOpen}
         onSuccess={() => {
-          // يمكن إضافة تحديث للبيانات هنا بعد فتح الحساب بنجاح
+          // تحديث البيانات بعد فتح الحساب بنجاح
+          fetchCustomerData();
+          toast({
+            title: "تم بنجاح",
+            description: "تم فتح الحساب الجديد بنجاح",
+          });
         }}
+        customerId={customer?.id || 101} // استخدام معرف العميل الحالي أو القيمة الافتراضية
       />
     </div>
   );
