@@ -29,12 +29,24 @@ import {
   XCircle,
   Shield,
   AlertCircle,
+<<<<<<< HEAD
 } from "lucide-react";
 import { Badge } from "../ui/badge";
 import { Avatar, AvatarFallback } from "../ui/avatar";
 import { db } from "@/lib/db";
 import { customerService } from "@/lib/customers";
 import CustomerDetails from "./CustomerDetails";
+=======
+  CreditCard,
+} from "lucide-react";
+import { Badge } from "../ui/badge";
+import { Avatar, AvatarFallback } from "../ui/avatar";
+import { db } from "../../lib/db";
+import { supabase } from "../../lib/supabase";
+import { customerService } from "../../services/customerService";
+import CustomerDetails from "./CustomerDetails";
+import CustomerIdVerification from "./CustomerIdVerification";
+>>>>>>> 9f77d8f (first commit)
 import {
   Dialog,
   DialogContent,
@@ -50,20 +62,82 @@ export default function CustomerManagement() {
   const [isCustomerDetailsOpen, setIsCustomerDetailsOpen] = useState(false);
   const [isAddCustomerOpen, setIsAddCustomerOpen] = useState(false);
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
+<<<<<<< HEAD
+=======
+  const [isIdVerificationOpen, setIsIdVerificationOpen] = useState(false);
+>>>>>>> 9f77d8f (first commit)
   const [customerToDelete, setCustomerToDelete] = useState(null);
   const [searchTerm, setSearchTerm] = useState("");
   const [statusFilter, setStatusFilter] = useState("all");
   const [customers, setCustomers] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
+<<<<<<< HEAD
+=======
+  const [formData, setFormData] = useState({
+    name: "",
+    email: "",
+    phone: "",
+    address: "",
+    idNumber: "",
+    initialBalance: "0"
+  });
+
+  const handleFormChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const { id, value } = e.target;
+    setFormData(prev => ({
+      ...prev,
+      [id]: value
+    }));
+  };
+>>>>>>> 9f77d8f (first commit)
 
   useEffect(() => {
     // استرجاع البيانات من قاعدة البيانات
     setIsLoading(true);
+<<<<<<< HEAD
     setTimeout(() => {
       // تعيين قائمة فارغة للعملاء
       setCustomers([]);
       setIsLoading(false);
     }, 1000);
+=======
+    const fetchCustomers = async () => {
+      try {
+        // استخدام خدمة العملاء لجلب البيانات
+        const data = await customerService.getAllCustomers();
+        
+        // تنسيق البيانات حسب بنية المكون
+        const formattedData = data.map(customer => {
+          // إنشاء رقم حساب عشوائي إذا لم يكن موجودًا
+          const accountNumber = `**** ${Math.floor(1000 + Math.random() * 9000)}`;
+          
+          // استخدام حد المعاملات كرصيد إذا كان متاحًا
+          const balanceValue = customer.transaction_limit || 0;
+          const balance = `${balanceValue} د.ج`;
+          
+          return {
+            id: customer.id,
+            name: customer.name,
+            accountNumber: accountNumber,
+            balance: balance,
+            status: customer.status || "نشط",
+            email: customer.email,
+            phone: customer.phone,
+          };
+        });
+        
+        setCustomers(formattedData);
+      } catch (error) {
+        console.error("Error fetching customers:", error);
+        // استخدام بيانات المحاكاة من db.ts في حالة فشل الاتصال بقاعدة البيانات
+        setCustomers(db.getCustomers());
+      } finally {
+        setIsLoading(false);
+      }
+    };
+    
+    fetchCustomers();
+>>>>>>> 9f77d8f (first commit)
   }, []);
 
   // تطبيق الفلترة على العملاء
@@ -281,8 +355,42 @@ export default function CustomerManagement() {
                         <Edit className="h-4 w-4" />
                       </Button>
                       <Button
+<<<<<<< HEAD
                         variant={
                           customer.status === "نشط" ? "destructive" : "success"
+=======
+                        variant="outline"
+                        size="sm"
+                        className="h-8 w-8 p-0"
+                        onClick={async () => {
+                          // Fetch complete customer data including verification info
+                          try {
+                            const { data, error } = await supabase
+                              .from("customers")
+                              .select("*")
+                              .eq("id", customer.id)
+                              .single();
+                              
+                            if (error) {
+                              console.error("Error fetching customer data:", error);
+                              alert("حدث خطأ أثناء جلب بيانات العميل");
+                              return;
+                            }
+                            
+                            setSelectedCustomer(data);
+                            setIsIdVerificationOpen(true);
+                          } catch (err) {
+                            console.error("Error:", err);
+                            alert("حدث خطأ أثناء جلب بيانات العميل");
+                          }
+                        }}
+                      >
+                        <CreditCard className="h-4 w-4" />
+                      </Button>
+                      <Button
+                        variant={
+                          customer.status === "نشط" ? "destructive" : "default"
+>>>>>>> 9f77d8f (first commit)
                         }
                         size="sm"
                         onClick={() => handleToggleStatus(customer)}
@@ -339,7 +447,16 @@ export default function CustomerManagement() {
           <div className="space-y-4">
             <div className="space-y-2">
               <Label htmlFor="name">اسم العميل</Label>
+<<<<<<< HEAD
               <Input id="name" placeholder="أدخل اسم العميل" />
+=======
+              <Input 
+                id="name" 
+                placeholder="أدخل اسم العميل" 
+                value={formData.name}
+                onChange={handleFormChange}
+              />
+>>>>>>> 9f77d8f (first commit)
             </div>
             <div className="space-y-2">
               <Label htmlFor="email">البريد الإلكتروني</Label>
@@ -347,10 +464,16 @@ export default function CustomerManagement() {
                 id="email"
                 type="email"
                 placeholder="example@example.com"
+<<<<<<< HEAD
+=======
+                value={formData.email}
+                onChange={handleFormChange}
+>>>>>>> 9f77d8f (first commit)
               />
             </div>
             <div className="space-y-2">
               <Label htmlFor="phone">رقم الهاتف</Label>
+<<<<<<< HEAD
               <Input id="phone" placeholder="05XXXXXXXX" />
             </div>
             <div className="space-y-2">
@@ -364,6 +487,42 @@ export default function CustomerManagement() {
             <div className="space-y-2">
               <Label htmlFor="initial-balance">الرصيد الأولي</Label>
               <Input id="initial-balance" type="number" placeholder="0" />
+=======
+              <Input 
+                id="phone" 
+                placeholder="05XXXXXXXX"
+                value={formData.phone}
+                onChange={handleFormChange}
+              />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="address">العنوان</Label>
+              <Input 
+                id="address" 
+                placeholder="أدخل العنوان"
+                value={formData.address}
+                onChange={handleFormChange}
+              />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="idNumber">رقم الهوية</Label>
+              <Input 
+                id="idNumber" 
+                placeholder="أدخل رقم الهوية"
+                value={formData.idNumber}
+                onChange={handleFormChange}
+              />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="initialBalance">الرصيد الأولي</Label>
+              <Input 
+                id="initialBalance" 
+                type="number" 
+                placeholder="0"
+                value={formData.initialBalance}
+                onChange={handleFormChange}
+              />
+>>>>>>> 9f77d8f (first commit)
             </div>
           </div>
           <DialogFooter className="flex justify-between">
@@ -381,6 +540,7 @@ export default function CustomerManagement() {
                 // محاكاة إضافة عميل جديد
                 setTimeout(() => {
                   const newCustomer = {
+<<<<<<< HEAD
                     id: Math.max(...customers.map((c) => c.id)) + 1,
                     name: document.getElementById("name").value || "عميل جديد",
                     accountNumber: `**** ${Math.floor(1000 + Math.random() * 9000)}`,
@@ -391,6 +551,15 @@ export default function CustomerManagement() {
                       "new@example.com",
                     phone:
                       document.getElementById("phone").value || "05XXXXXXXX",
+=======
+                    id: Math.max(...customers.map((c) => c.id), 0) + 1,
+                    name: formData.name || "عميل جديد",
+                    accountNumber: `**** ${Math.floor(1000 + Math.random() * 9000)}`,
+                    balance: formData.initialBalance + " د.ج",
+                    status: "نشط",
+                    email: formData.email || "new@example.com",
+                    phone: formData.phone || "05XXXXXXXX",
+>>>>>>> 9f77d8f (first commit)
                   };
 
                   setCustomers([...customers, newCustomer]);
@@ -438,6 +607,16 @@ export default function CustomerManagement() {
         onOpenChange={setIsCustomerDetailsOpen}
         customer={selectedCustomer}
       />
+<<<<<<< HEAD
+=======
+
+      {/* التحقق من بطاقة الهوية */}
+      <CustomerIdVerification
+        open={isIdVerificationOpen}
+        onOpenChange={setIsIdVerificationOpen}
+        customer={selectedCustomer}
+      />
+>>>>>>> 9f77d8f (first commit)
     </div>
   );
 }

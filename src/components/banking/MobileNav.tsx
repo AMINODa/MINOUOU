@@ -25,7 +25,10 @@ const navItems = [
   { icon: DollarSign, label: "العملات الأجنبية", href: "/bank/currencies" },
   { icon: Send, label: "التحويلات", href: "/bank/transfers" },
   { icon: BarChart3, label: "المعاملات", href: "/bank/transactions" },
+<<<<<<< HEAD
   { icon: PiggyBank, label: "الادخار", href: "/bank/savings" },
+=======
+>>>>>>> 9f77d8f (first commit)
   { icon: Settings, label: "الإعدادات", href: "/bank/settings" },
   { icon: HelpCircle, label: "المساعدة", href: "/bank/help" },
 ];
@@ -43,6 +46,7 @@ export default function MobileNav() {
             </Button>
           </SheetTrigger>
           <SheetContent side="right" className="w-[85%] max-w-sm p-0" dir="rtl">
+<<<<<<< HEAD
             <div className="bg-primary text-primary-foreground p-6">
               <div className="flex items-center gap-4 mb-6">
                 <Avatar className="h-12 w-12 border-2 border-primary-foreground">
@@ -67,6 +71,11 @@ export default function MobileNav() {
                   <p className="font-bold">4,800</p>
                 </div>
               </div>
+=======
+            <div className="bg-primary text-primary-foreground p-6 border-b border-primary-foreground/10">
+              <h2 className="text-2xl font-bold">بنك الأمان</h2>
+              <p className="text-sm opacity-70">الخدمات المصرفية الشخصية</p>
+>>>>>>> 9f77d8f (first commit)
             </div>
             <nav className="p-4">
               <ul className="space-y-2">

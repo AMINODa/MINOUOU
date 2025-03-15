@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 // قاعدة بيانات العملاء الحقيقيين
 export const realCustomers = [
   {
@@ -225,3 +226,171 @@ export const customerService = {
     return realCustomers[customerIndex];
   },
 };
+=======
+// Customer service for authentication and customer management
+import { supabase } from "./supabase";
+
+// Define a simple customer interface
+interface Customer {
+  id: string;
+  username: string;
+  password: string;
+  name: string;
+  email: string;
+  phone: string;
+  avatar?: string;
+  account_number?: string;
+  balance?: number;
+  currency?: string;
+  created_at?: string;
+}
+
+// Sample customers for testing (normally these would come from the database)
+const sampleCustomers: Customer[] = [
+  {
+    id: "1",
+    username: "ahmad",
+    password: "password123",
+    name: "أحمد محمد",
+    email: "ahmad@example.com",
+    phone: "0501234567",
+    avatar: "https://api.dicebear.com/7.x/avataaars/svg?seed=ahmad",
+    account_number: "1000-1234-5678",
+    balance: 25000,
+    currency: "SAR",
+    created_at: "2024-01-15T08:30:00Z",
+  },
+  {
+    id: "2",
+    username: "sara",
+    password: "password123",
+    name: "سارة عبدالله",
+    email: "sara@example.com",
+    phone: "0559876543",
+    avatar: "https://api.dicebear.com/7.x/avataaars/svg?seed=sara",
+    account_number: "1000-8765-4321",
+    balance: 18500,
+    currency: "SAR",
+    created_at: "2024-02-20T14:45:00Z",
+  },
+];
+
+class CustomerService {
+  // Authenticate a customer with username and password
+  authenticateCustomer(username: string, password: string): Customer | undefined {
+    // First try to find the customer in the sample data
+    const customer = sampleCustomers.find(
+      (c) => c.username === username && c.password === password
+    );
+
+    if (customer) {
+      return customer;
+    }
+
+    // If not found in sample data, return undefined
+    // In a real application, we would check the database here
+    return undefined;
+  }
+
+  // Get all customers
+  async getAllCustomers(): Promise<Customer[]> {
+    try {
+      const { data, error } = await supabase.from("customers").select("*");
+      
+      if (error) {
+        console.error("Error fetching customers:", error);
+        return sampleCustomers; // Fallback to sample data
+      }
+      
+      return data as Customer[];
+    } catch (err) {
+      console.error("Error in getAllCustomers:", err);
+      return sampleCustomers; // Fallback to sample data
+    }
+  }
+
+  // Get customer by ID
+  async getCustomerById(id: string): Promise<Customer | undefined> {
+    try {
+      const { data, error } = await supabase
+        .from("customers")
+        .select("*")
+        .eq("id", id)
+        .single();
+      
+      if (error) {
+        console.error("Error fetching customer:", error);
+        return sampleCustomers.find(c => c.id === id); // Fallback to sample data
+      }
+      
+      return data as Customer;
+    } catch (err) {
+      console.error("Error in getCustomerById:", err);
+      return sampleCustomers.find(c => c.id === id); // Fallback to sample data
+    }
+  }
+
+  // Create a new customer
+  async createCustomer(customer: Omit<Customer, "id">): Promise<Customer | undefined> {
+    try {
+      const { data, error } = await supabase
+        .from("customers")
+        .insert([customer])
+        .select();
+      
+      if (error) {
+        console.error("Error creating customer:", error);
+        return undefined;
+      }
+      
+      return data[0] as Customer;
+    } catch (err) {
+      console.error("Error in createCustomer:", err);
+      return undefined;
+    }
+  }
+
+  // Update an existing customer
+  async updateCustomer(id: string, updates: Partial<Customer>): Promise<Customer | undefined> {
+    try {
+      const { data, error } = await supabase
+        .from("customers")
+        .update(updates)
+        .eq("id", id)
+        .select();
+      
+      if (error) {
+        console.error("Error updating customer:", error);
+        return undefined;
+      }
+      
+      return data[0] as Customer;
+    } catch (err) {
+      console.error("Error in updateCustomer:", err);
+      return undefined;
+    }
+  }
+
+  // Delete a customer
+  async deleteCustomer(id: string): Promise<boolean> {
+    try {
+      const { error } = await supabase
+        .from("customers")
+        .delete()
+        .eq("id", id);
+      
+      if (error) {
+        console.error("Error deleting customer:", error);
+        return false;
+      }
+      
+      return true;
+    } catch (err) {
+      console.error("Error in deleteCustomer:", err);
+      return false;
+    }
+  }
+}
+
+export const customerService = new CustomerService();
+>>>>>>> 9f77d8f (first commit)

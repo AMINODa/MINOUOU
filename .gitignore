@@ -29,3 +29,7 @@ dist-ssr
 **/tempobook/storyboards/
 
 core
+<<<<<<< HEAD
+=======
+.qodo
+>>>>>>> 9f77d8f (first commit)

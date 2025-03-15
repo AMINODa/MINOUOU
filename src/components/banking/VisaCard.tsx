@@ -26,7 +26,11 @@ const visaCards = [
     expiryDate: "09/26",
     cvv: "123",
     cardHolder: "أحمد محمد",
+<<<<<<< HEAD
     balance: "15,000 د.ج",
+=======
+    balance: "0 د.ج",
+>>>>>>> 9f77d8f (first commit)
     limit: "50,000 د.ج",
     status: "نشطة",
     color: "bg-gradient-to-r from-primary to-primary/60",
@@ -38,13 +42,18 @@ const visaCards = [
     expiryDate: "03/25",
     cvv: "456",
     cardHolder: "أحمد محمد",
+<<<<<<< HEAD
     balance: "5,200 د.ج",
+=======
+    balance: "0 د.ج",
+>>>>>>> 9f77d8f (first commit)
     limit: "20,000 د.ج",
     status: "نشطة",
     color: "bg-gradient-to-r from-secondary to-secondary/70",
   },
 ];
 
+<<<<<<< HEAD
 const recentTransactions = [
   {
     id: 1,
@@ -68,6 +77,10 @@ const recentTransactions = [
     status: "مكتملة",
   },
 ];
+=======
+// قائمة المعاملات فارغة
+const recentTransactions = [];
+>>>>>>> 9f77d8f (first commit)
 
 export default function VisaCard() {
   const [showCardDetails, setShowCardDetails] = useState(false);
@@ -221,6 +234,7 @@ export default function VisaCard() {
                 </CardDescription>
               </CardHeader>
               <CardContent>
+<<<<<<< HEAD
                 <div className="space-y-4">
                   {recentTransactions.map((transaction) => (
                     <div
@@ -250,6 +264,16 @@ export default function VisaCard() {
                   عرض جميع المعاملات
                 </Button>
               </CardFooter>
+=======
+                <div className="p-8 text-center border rounded-lg bg-muted/20">
+                  <CreditCard className="h-10 w-10 text-muted-foreground mx-auto mb-2" />
+                  <h3 className="font-medium">لا توجد معاملات</h3>
+                  <p className="text-sm text-muted-foreground mb-4">
+                    لم يتم العثور على أي معاملات لهذه البطاقة
+                  </p>
+                </div>
+              </CardContent>
+>>>>>>> 9f77d8f (first commit)
             </Card>
           </TabsContent>
 

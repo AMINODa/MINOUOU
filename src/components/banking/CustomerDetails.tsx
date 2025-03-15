@@ -1,4 +1,8 @@
+<<<<<<< HEAD
 import { useState } from "react";
+=======
+import { useState, useEffect } from "react";
+>>>>>>> 9f77d8f (first commit)
 import {
   Dialog,
   DialogContent,
@@ -43,6 +47,7 @@ import { Badge } from "../ui/badge";
 interface CustomerDetailsProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
+<<<<<<< HEAD
   customer: {
     id: number;
     name: string;
@@ -52,6 +57,9 @@ interface CustomerDetailsProps {
     email: string;
     phone: string;
   } | null;
+=======
+  customer: any | null;
+>>>>>>> 9f77d8f (first commit)
 }
 
 export default function CustomerDetails({
@@ -60,10 +68,27 @@ export default function CustomerDetails({
   customer,
 }: CustomerDetailsProps) {
   const [balance, setBalance] = useState("");
+<<<<<<< HEAD
   const [status, setStatus] = useState(customer?.status || "نشط");
   const [securityLevel, setSecurityLevel] = useState("medium");
   const [transactionLimit, setTransactionLimit] = useState("50000");
   const [twoFactorEnabled, setTwoFactorEnabled] = useState(false);
+=======
+  const [status, setStatus] = useState("");
+  const [securityLevel, setSecurityLevel] = useState("");
+  const [transactionLimit, setTransactionLimit] = useState("");
+  const [twoFactorEnabled, setTwoFactorEnabled] = useState(false);
+
+  // Initialize state values from customer data when the component is opened
+  useEffect(() => {
+    if (customer) {
+      setStatus(customer.status || "نشط");
+      setSecurityLevel(customer.security_level || "medium");
+      setTransactionLimit(customer.transaction_limit?.toString() || "50000");
+      setTwoFactorEnabled(customer.two_factor_enabled || false);
+    }
+  }, [customer]);
+>>>>>>> 9f77d8f (first commit)
   const [showAddAccountForm, setShowAddAccountForm] = useState(false);
   const [accountType, setAccountType] = useState("جاري");
   const [currency, setCurrency] = useState("دينار جزائري");
@@ -219,7 +244,11 @@ export default function CustomerDetails({
                   <Input
                     id="dob"
                     type="date"
+<<<<<<< HEAD
                     defaultValue="1990-01-01"
+=======
+                    defaultValue={customer.dob || "1990-01-01"}
+>>>>>>> 9f77d8f (first commit)
                     className="pr-10"
                   />
                 </div>
@@ -227,12 +256,20 @@ export default function CustomerDetails({
 
               <div className="space-y-2">
                 <Label htmlFor="address">العنوان</Label>
+<<<<<<< HEAD
                 <Input id="address" defaultValue="الجزائر العاصمة" />
+=======
+                <Input id="address" defaultValue={customer.address || "الجزائر العاصمة"} />
+>>>>>>> 9f77d8f (first commit)
               </div>
 
               <div className="space-y-2">
                 <Label htmlFor="id-number">رقم الهوية</Label>
+<<<<<<< HEAD
                 <Input id="id-number" defaultValue="29384756" />
+=======
+                <Input id="id-number" defaultValue={customer.id_number || ""} />
+>>>>>>> 9f77d8f (first commit)
               </div>
             </div>
 
@@ -250,12 +287,20 @@ export default function CustomerDetails({
                 <div>
                   <h3 className="font-medium">الحساب الجاري</h3>
                   <p className="text-sm text-muted-foreground">
+<<<<<<< HEAD
                     {customer.accountNumber}
+=======
+                    {customer.id_number || "غير متوفر"}
+>>>>>>> 9f77d8f (first commit)
                   </p>
                 </div>
                 <div className="text-right">
                   <p className="text-sm text-muted-foreground">الرصيد الحالي</p>
+<<<<<<< HEAD
                   <p className="font-bold text-xl">{customer.balance}</p>
+=======
+                  <p className="font-bold text-xl">{customer.transaction_limit || 0} د.ج</p>
+>>>>>>> 9f77d8f (first commit)
                 </div>
               </div>
 

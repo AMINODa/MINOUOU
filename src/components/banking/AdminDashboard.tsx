@@ -31,8 +31,12 @@ import {
 import { Input } from "../ui/input";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "../ui/tabs";
 import CustomerDetails from "./CustomerDetails";
+<<<<<<< HEAD
 import { db } from "@/lib/db";
 import { customerService } from "@/lib/customers";
+=======
+import { customerService } from "../../services/customerService";
+>>>>>>> 9f77d8f (first commit)
 import { Badge } from "../ui/badge";
 import { Avatar, AvatarFallback } from "../ui/avatar";
 import {
@@ -43,6 +47,7 @@ import {
   SelectValue,
 } from "../ui/select";
 
+<<<<<<< HEAD
 export default function AdminDashboard() {
   const [selectedCustomer, setSelectedCustomer] = useState(null);
   const [isCustomerDetailsOpen, setIsCustomerDetailsOpen] = useState(false);
@@ -50,24 +55,184 @@ export default function AdminDashboard() {
   const [statusFilter, setStatusFilter] = useState("all");
   const [customers, setCustomers] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
+=======
+import { transactionService } from "../../services/transactionService";
+
+// Interfaces for type safety
+interface Customer {
+  id: number;
+  name: string;
+  email?: string;
+  phone?: string;
+  id_number?: string;
+  status?: string;
+  transaction_limit?: number;
+  created_at: string;
+  [key: string]: any;
+}
+
+interface Transaction {
+  id: number;
+  account_id: number;
+  customer_id?: number;
+  amount: string | number;  // Allow both string and number types
+  type: string;
+  created_at: string;
+  description?: string;
+  status?: string;
+  recipient_account_id?: number;
+  from_currency?: string;
+  to_currency?: string;
+  [key: string]: any;
+}
+
+interface Alert {
+  id: number;
+  type: string;
+  title: string;
+  description: string;
+  time: string;
+  actionType?: string;
+  transactionId?: number;
+  amount?: number | string;
+  customerId?: number;
+  customerName?: string;
+  fromCurrency?: string;
+  toCurrency?: string;
+}
+
+export default function AdminDashboard() {
+  const [selectedCustomer, setSelectedCustomer] = useState<Customer | null>(null);
+  const [isCustomerDetailsOpen, setIsCustomerDetailsOpen] = useState(false);
+  const [searchTerm, setSearchTerm] = useState("");
+  const [statusFilter, setStatusFilter] = useState("all");
+  const [customers, setCustomers] = useState<Customer[]>([]);
+  const [transactions, setTransactions] = useState<Transaction[]>([]);
+  const [totalDeposits, setTotalDeposits] = useState(0);
+  const [dailyTransactions, setDailyTransactions] = useState(0);
+  const [isLoading, setIsLoading] = useState(true);
+  const [alerts, setAlerts] = useState<Alert[]>([]);
+  const [pendingTransfers, setPendingTransfers] = useState<Transaction[]>([]);
+>>>>>>> 9f77d8f (first commit)
 
   useEffect(() => {
     // استرجاع البيانات من قاعدة البيانات
     setIsLoading(true);
+<<<<<<< HEAD
     setTimeout(() => {
       // تعيين قائمة فارغة للعملاء
       setCustomers([]);
       setIsLoading(false);
     }, 1000);
+=======
+    const fetchData = async () => {
+      try {
+        // جلب بيانات العملاء
+        const customersData = await customerService.getAllCustomers();
+        setCustomers(customersData || []);
+        
+        // جلب بيانات المعاملات
+        const transactionsData = await transactionService.getAllTransactions();
+        // Cast transactions to our expected type
+        const typedTransactions = transactionsData?.map(t => ({
+          ...t,
+          amount: typeof t.amount === 'number' ? t.amount.toString() : t.amount
+        }));
+        setTransactions(typedTransactions || []);
+        
+        // إضافة بيانات توضيحية للتحويلات المعلقة (في بيئة الإنتاج سيتم استبدالها بالبيانات الفعلية)
+        const mockPendingTransfers = [
+          {
+            id: 1001,
+            account_id: 1,
+            customer_id: 1,
+            amount: 5000,
+            type: "تحويل عملة",
+            status: "معلق",
+            description: "تحويل من الدينار الجزائري إلى اليورو",
+            created_at: new Date().toISOString(),
+            from_currency: "د.ج",
+            to_currency: "EUR"
+          },
+          {
+            id: 1002,
+            account_id: 2,
+            customer_id: 2,
+            amount: 10000,
+            type: "تحويل عملة",
+            status: "معلق",
+            description: "تحويل من الدينار الجزائري إلى الدولار الأمريكي",
+            created_at: new Date(Date.now() - 1000 * 60 * 60).toISOString(), // قبل ساعة
+            from_currency: "د.ج",
+            to_currency: "USD"
+          }
+        ];
+        
+        setPendingTransfers(mockPendingTransfers);
+        
+        // إنشاء تنبيهات من التحويلات المعلقة
+        const newAlerts = mockPendingTransfers.map((transfer, index) => {
+          // البحث عن العميل المرتبط بالتحويل
+          const customer = customersData.find(c => c.id === transfer.customer_id);
+          return {
+            id: index + 1,
+            type: "warning",
+            title: "طلب تحويل عملة",
+            description: `طلب تحويل ${transfer.amount} ${transfer.from_currency} إلى ${transfer.to_currency}`,
+            time: new Date(transfer.created_at).toLocaleString(),
+            actionType: "currency_transfer",
+            transactionId: transfer.id,
+            amount: transfer.amount,
+            customerId: transfer.customer_id,
+            customerName: customer ? customer.name : "عميل غير معروف",
+            fromCurrency: transfer.from_currency,
+            toCurrency: transfer.to_currency
+          };
+        });
+        setAlerts(newAlerts);
+        
+        // حساب إجمالي الإيداعات
+        const depositsTotal = transactionsData
+          .filter(t => t.type === "إيداع")
+          .reduce((total, t) => {
+            const amount = typeof t.amount === 'string' ? parseFloat(t.amount) : t.amount;
+            return total + (amount || 0);
+          }, 0);
+        setTotalDeposits(depositsTotal);
+        
+        // حساب المعاملات اليومية
+        const today = new Date();
+        today.setHours(0, 0, 0, 0);
+        const dailyTxCount = transactionsData.filter(t => {
+          const txDate = new Date(t.created_at);
+          return txDate >= today;
+        }).length;
+        setDailyTransactions(dailyTxCount);
+      } catch (error) {
+        console.error("Error fetching data:", error);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+    
+    fetchData();
+>>>>>>> 9f77d8f (first commit)
   }, []);
 
   // تطبيق الفلترة على العملاء
   const filteredCustomers = customers.filter((customer) => {
     const matchesSearch =
+<<<<<<< HEAD
       customer.name.includes(searchTerm) ||
       customer.email.includes(searchTerm) ||
       customer.phone.includes(searchTerm) ||
       customer.accountNumber.includes(searchTerm);
+=======
+      (customer.name && customer.name.includes(searchTerm)) ||
+      (customer.email && customer.email.includes(searchTerm)) ||
+      (customer.phone && customer.phone.includes(searchTerm)) ||
+      (customer.id_number && customer.id_number.includes(searchTerm));
+>>>>>>> 9f77d8f (first commit)
 
     const matchesStatus =
       statusFilter === "all" || customer.status === statusFilter;
@@ -114,14 +279,27 @@ export default function AdminDashboard() {
           </CardHeader>
           <CardContent>
             <div className="flex items-center justify-between">
+<<<<<<< HEAD
               <div className="text-2xl font-bold">0</div>
+=======
+              <div className="text-2xl font-bold">{customers.length}</div>
+>>>>>>> 9f77d8f (first commit)
               <div className="text-xs text-muted-foreground flex items-center">
                 <TrendingUp className="h-3 w-3 mr-1" />
                 0%
               </div>
             </div>
             <div className="text-xs text-muted-foreground mt-1">
+<<<<<<< HEAD
               0 عميل جديد هذا الشهر
+=======
+              {customers.filter(c => {
+                const createdAt = new Date(c.created_at);
+                const today = new Date();
+                return createdAt.getMonth() === today.getMonth() && 
+                       createdAt.getFullYear() === today.getFullYear();
+              }).length} عميل جديد هذا الشهر
+>>>>>>> 9f77d8f (first commit)
             </div>
           </CardContent>
         </Card>
@@ -135,14 +313,37 @@ export default function AdminDashboard() {
           </CardHeader>
           <CardContent>
             <div className="flex items-center justify-between">
+<<<<<<< HEAD
               <div className="text-2xl font-bold">0 د.ج</div>
+=======
+              <div className="text-2xl font-bold">{totalDeposits.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",")} د.ج</div>
+>>>>>>> 9f77d8f (first commit)
               <div className="text-xs text-muted-foreground flex items-center">
                 <TrendingUp className="h-3 w-3 mr-1" />
                 0%
               </div>
             </div>
             <div className="text-xs text-muted-foreground mt-1">
+<<<<<<< HEAD
               0 د.ج زيادة عن الشهر الماضي
+=======
+              {(() => {
+                const lastMonthDeposits = transactions
+                  .filter(t => {
+                    const txDate = new Date(t.created_at);
+                    const today = new Date();
+                    const lastMonth = new Date(today.getFullYear(), today.getMonth() - 1);
+                    return t.type === "إيداع" && 
+                          txDate.getMonth() === lastMonth.getMonth() && 
+                          txDate.getFullYear() === lastMonth.getFullYear();
+                  })
+                  .reduce((total, t) => {
+                    const amount = typeof t.amount === 'string' ? parseFloat(t.amount) : t.amount;
+                    return total + (amount || 0);
+                  }, 0);
+                return lastMonthDeposits.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+              })()} د.ج زيادة عن الشهر الماضي
+>>>>>>> 9f77d8f (first commit)
             </div>
           </CardContent>
         </Card>
@@ -177,6 +378,7 @@ export default function AdminDashboard() {
           </CardHeader>
           <CardContent>
             <div className="flex items-center justify-between">
+<<<<<<< HEAD
               <div className="text-2xl font-bold">0</div>
               <div className="text-xs text-muted-foreground flex items-center">
                 <TrendingUp className="h-3 w-3 mr-1" />
@@ -185,6 +387,22 @@ export default function AdminDashboard() {
             </div>
             <div className="text-xs text-muted-foreground mt-1">
               0 معاملة في الساعة الأخيرة
+=======
+              <div className="text-2xl font-bold">{dailyTransactions}</div>
+              <div className="text-xs text-muted-foreground flex items-center">
+                <TrendingUp className="h-3 w-3 mr-1" />
+                {transactions.length > 0 ? Math.round((dailyTransactions / transactions.length) * 100) : 0}%
+              </div>
+            </div>
+            <div className="text-xs text-muted-foreground mt-1">
+              {transactions
+                .filter(t => {
+                  const txDate = new Date(t.created_at);
+                  const oneHourAgo = new Date();
+                  oneHourAgo.setHours(oneHourAgo.getHours() - 1);
+                  return txDate >= oneHourAgo;
+                }).length} معاملة في الساعة الأخيرة
+>>>>>>> 9f77d8f (first commit)
             </div>
           </CardContent>
         </Card>
@@ -303,6 +521,7 @@ export default function AdminDashboard() {
                       <div className="font-medium">{customer.name}</div>
                     </div>
                     <div className="text-muted-foreground text-sm mt-1 md:mt-0">
+<<<<<<< HEAD
                       {customer.accountNumber}
                     </div>
                     <div className="text-muted-foreground text-sm mt-1 md:mt-0">
@@ -310,6 +529,15 @@ export default function AdminDashboard() {
                     </div>
                     <div className="font-medium mt-1 md:mt-0">
                       {customer.balance}
+=======
+                      {customer.id_number || "غير متوفر"}
+                    </div>
+                    <div className="text-muted-foreground text-sm mt-1 md:mt-0">
+                      {customer.email || "غير متوفر"}
+                    </div>
+                    <div className="font-medium mt-1 md:mt-0">
+                      {customer.transaction_limit || 0} د.ج
+>>>>>>> 9f77d8f (first commit)
                     </div>
                     <div className="flex gap-2 mt-2 md:mt-0">
                       <Badge
@@ -346,7 +574,11 @@ export default function AdminDashboard() {
                       </Button>
                       <Button
                         variant={
+<<<<<<< HEAD
                           customer.status === "نشط" ? "destructive" : "success"
+=======
+                          customer.status === "نشط" ? "destructive" : "default"
+>>>>>>> 9f77d8f (first commit)
                         }
                         size="sm"
                       >
@@ -409,14 +641,22 @@ export default function AdminDashboard() {
                 </div>
 
                 <div className="divide-y">
+<<<<<<< HEAD
                   {[].map((transaction) => (
+=======
+                  {transactions.map((transaction) => (
+>>>>>>> 9f77d8f (first commit)
                     <div
                       key={transaction.id}
                       className="flex flex-col md:grid md:grid-cols-5 p-4 items-start md:items-center border-b md:border-b-0 hover:bg-muted/10 transition-colors"
                     >
                       <div className="font-medium">{transaction.id}</div>
                       <div className="text-muted-foreground text-sm mt-1 md:mt-0">
+<<<<<<< HEAD
                         {transaction.customer}
+=======
+                        {transaction.customer_id || "غير متوفر"}
+>>>>>>> 9f77d8f (first commit)
                       </div>
                       <div className="mt-1 md:mt-0">
                         <Badge
@@ -433,12 +673,24 @@ export default function AdminDashboard() {
                         </Badge>
                       </div>
                       <div
+<<<<<<< HEAD
                         className={`font-medium mt-1 md:mt-0 ${transaction.amount.startsWith("+") ? "text-success" : "text-destructive"}`}
                       >
                         {transaction.amount}
                       </div>
                       <div className="text-muted-foreground text-sm mt-1 md:mt-0">
                         {transaction.date}
+=======
+                        className={`font-medium mt-1 md:mt-0 ${transaction.type === "إيداع" ? "text-success" : "text-destructive"}`}
+                      >
+                        {transaction.type === "إيداع" ? "+" : "-"}
+                        {(typeof transaction.amount === 'string' 
+                          ? parseFloat(transaction.amount) 
+                          : transaction.amount).toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",")} د.ج
+                      </div>
+                      <div className="text-muted-foreground text-sm mt-1 md:mt-0">
+                        {new Date(transaction.created_at).toLocaleDateString()}
+>>>>>>> 9f77d8f (first commit)
                       </div>
                     </div>
                   ))}
@@ -447,7 +699,11 @@ export default function AdminDashboard() {
 
               <div className="flex items-center justify-between mt-4">
                 <div className="text-sm text-muted-foreground">
+<<<<<<< HEAD
                   عرض 0 من 0 معاملة
+=======
+                  عرض {transactions.length} من {transactions.length} معاملة
+>>>>>>> 9f77d8f (first commit)
                 </div>
                 <div className="flex items-center space-x-2 space-x-reverse">
                   <Button variant="outline" size="sm" disabled>
@@ -466,6 +722,7 @@ export default function AdminDashboard() {
           <Card className="border-0 shadow-none">
             <CardHeader className="px-0">
               <CardTitle>التنبيهات والإشعارات</CardTitle>
+<<<<<<< HEAD
               <CardDescription>مراقبة أحداث النظام والتنبيهات</CardDescription>
             </CardHeader>
             <CardContent className="px-0">
@@ -517,6 +774,132 @@ export default function AdminDashboard() {
                 </p>
               </div>
             </CardFooter>
+=======
+              <CardDescription>مراقبة ومعالجة طلبات تحويل العملات</CardDescription>
+            </CardHeader>
+            <CardContent className="px-0">
+              <div className="space-y-4">
+                {alerts.length > 0 ? (
+                  alerts.map((alert) => (
+                    <div
+                      key={alert.id}
+                      className="flex flex-col md:flex-row items-start p-4 border rounded-lg hover:bg-muted/10 transition-colors"
+                    >
+                      <div className="flex w-full md:w-auto">
+                        <div
+                          className={`p-2 rounded-full ml-4 ${
+                            alert.type === "warning"
+                              ? "bg-warning/10"
+                              : alert.type === "success"
+                                ? "bg-success/10"
+                                : "bg-primary/10"
+                          }`}
+                        >
+                          {alert.type === "warning" ? (
+                            <AlertTriangle className="h-5 w-5 text-warning" />
+                          ) : alert.type === "success" ? (
+                            <CheckCircle className="h-5 w-5 text-success" />
+                          ) : (
+                            <Clock className="h-5 w-5 text-primary" />
+                          )}
+                        </div>
+                        <div className="flex-1">
+                          <h3 className="font-medium">{alert.title}</h3>
+                          <p className="text-sm text-muted-foreground">
+                            {alert.description}
+                          </p>
+                          <div className="text-xs text-muted-foreground mt-1">
+                            <p className="mt-1">الوقت: {alert.time}</p>
+                            <p className="mt-1">العميل: {alert.customerName}</p>
+                            <p className="mt-1">المبلغ: {alert.amount} {alert.fromCurrency}</p>
+                          </div>
+                        </div>
+                      </div>
+                      
+                      <div className="flex gap-2 mt-4 md:mt-0 md:mr-auto">
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          className="border-green-500 text-green-600 hover:bg-green-50 hover:text-green-700"
+                          onClick={() => {
+                            // محاكاة قبول طلب التحويل
+                            if (alert.transactionId) {
+                              // في التطبيق الحقيقي، سيتم استدعاء واجهة برمجة التطبيقات هنا
+                              const approvedAlert = {
+                                ...alert,
+                                type: "success",
+                                title: "تم قبول التحويل",
+                                description: `تم قبول تحويل ${alert.amount} ${alert.fromCurrency} إلى ${alert.toCurrency}`,
+                              };
+                              
+                              // تحديث حالة التنبيهات
+                              setAlerts(prevAlerts => 
+                                prevAlerts.map(a => 
+                                  a.id === alert.id ? approvedAlert : a
+                                )
+                              );
+                              
+                              // إزالة المعاملة من التحويلات المعلقة
+                              setPendingTransfers(prev => 
+                                prev.filter(t => t.id !== alert.transactionId)
+                              );
+                              
+                              // عرض رسالة للمستخدم
+                              window.alert("تم قبول طلب التحويل بنجاح");
+                            }
+                          }}
+                        >
+                          قبول
+                        </Button>
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          className="border-red-500 text-red-600 hover:bg-red-50 hover:text-red-700"
+                          onClick={() => {
+                            // محاكاة رفض طلب التحويل
+                            if (alert.transactionId) {
+                              // في التطبيق الحقيقي، سيتم استدعاء واجهة برمجة التطبيقات هنا
+                              const rejectedAlert = {
+                                ...alert,
+                                type: "destructive",
+                                title: "تم رفض التحويل",
+                                description: `تم رفض تحويل ${alert.amount} ${alert.fromCurrency} إلى ${alert.toCurrency}`,
+                              };
+                              
+                              // تحديث حالة التنبيهات
+                              setAlerts(prevAlerts => 
+                                prevAlerts.map(a => 
+                                  a.id === alert.id ? rejectedAlert : a
+                                )
+                              );
+                              
+                              // إزالة المعاملة من التحويلات المعلقة
+                              setPendingTransfers(prev => 
+                                prev.filter(t => t.id !== alert.transactionId)
+                              );
+                              
+                              // عرض رسالة للمستخدم
+                              window.alert("تم رفض طلب التحويل");
+                            }
+                          }}
+                        >
+                          رفض
+                        </Button>
+                      </div>
+                    </div>
+                  ))
+                ) : (
+                  <div className="text-center p-8 border rounded-md">
+                    <AlertCircle className="h-10 w-10 text-muted-foreground mx-auto mb-2" />
+                    <h3 className="font-medium">لا توجد تنبيهات</h3>
+                    <p className="text-sm text-muted-foreground mb-4">
+                      لم يتم العثور على أي طلبات تحويل عملات معلقة
+                    </p>
+                  </div>
+                )}
+              </div>
+            </CardContent>
+>>>>>>> 9f77d8f (first commit)
           </Card>
         </TabsContent>
       </Tabs>

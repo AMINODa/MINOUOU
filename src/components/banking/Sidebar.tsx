@@ -10,6 +10,11 @@ import {
   HelpCircle,
   LogOut,
   DollarSign,
+<<<<<<< HEAD
+=======
+  User,
+  Shield,
+>>>>>>> 9f77d8f (first commit)
 } from "lucide-react";
 
 const navItems = [
@@ -19,7 +24,12 @@ const navItems = [
   { icon: DollarSign, label: "العملات الأجنبية", href: "/bank/currencies" },
   { icon: Send, label: "التحويلات", href: "/bank/transfers" },
   { icon: BarChart3, label: "المعاملات", href: "/bank/transactions" },
+<<<<<<< HEAD
   { icon: PiggyBank, label: "الادخار", href: "/bank/savings" },
+=======
+  { icon: User, label: "معلومات الحساب", href: "/bank/account-info" },
+  { icon: Shield, label: "حالة الحساب", href: "/bank/account-status" },
+>>>>>>> 9f77d8f (first commit)
   { icon: Settings, label: "الإعدادات", href: "/bank/settings" },
   { icon: HelpCircle, label: "المساعدة", href: "/bank/help" },
 ];

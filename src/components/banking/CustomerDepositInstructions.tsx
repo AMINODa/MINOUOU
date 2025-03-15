@@ -24,10 +24,17 @@ import { Label } from "../ui/label";
 const bankAccounts = [
   {
     currency: "dzd",
+<<<<<<< HEAD
     name: "الحساب الرئيسي - دينار جزائري",
     number: "DZ59 0034 1234 5678 9012 3456",
     iban: "DZ59 0034 1234 5678 9012 3456 789",
     swift: "DZBAALGX",
+=======
+    name: "",
+    number: "",
+    iban: "",
+    swift: "",
+>>>>>>> 9f77d8f (first commit)
   },
   {
     currency: "usd",
@@ -46,7 +53,11 @@ const bankAccounts = [
 ];
 
 export default function CustomerDepositInstructions() {
+<<<<<<< HEAD
   const [selectedCurrency, setSelectedCurrency] = useState("dzd");
+=======
+  const [selectedCurrency, setSelectedCurrency] = useState("usd");
+>>>>>>> 9f77d8f (first commit)
   const [copiedField, setCopiedField] = useState("");
 
   const handleCopyToClipboard = (text, field) => {
@@ -94,7 +105,11 @@ export default function CustomerDepositInstructions() {
           </div>
 
           <Tabs
+<<<<<<< HEAD
             defaultValue="dzd"
+=======
+            defaultValue="usd"
+>>>>>>> 9f77d8f (first commit)
             value={selectedCurrency}
             onValueChange={setSelectedCurrency}
           >
@@ -113,6 +128,7 @@ export default function CustomerDepositInstructions() {
               </TabsTrigger>
             </TabsList>
 
+<<<<<<< HEAD
             <TabsContent value="dzd" className="space-y-4 mt-4">
               <div className="space-y-4">
                 <div className="bg-muted/30 p-4 rounded-md">
@@ -240,6 +256,8 @@ export default function CustomerDepositInstructions() {
               </div>
             </TabsContent>
 
+=======
+>>>>>>> 9f77d8f (first commit)
             <TabsContent value="usd" className="space-y-4 mt-4">
               <div className="space-y-4">
                 <div className="bg-muted/30 p-4 rounded-md">
@@ -254,7 +272,11 @@ export default function CustomerDepositInstructions() {
                       </div>
                     </div>
                     <div className="space-y-2">
+<<<<<<< HEAD
                       <Label>رقم الحساب</Label>
+=======
+                      <Label>الرقم</Label>
+>>>>>>> 9f77d8f (first commit)
                       <div className="flex items-center gap-2">
                         <div className="p-2 bg-white rounded-md flex-1 font-mono">
                           {currentAccount.number}
@@ -384,7 +406,11 @@ export default function CustomerDepositInstructions() {
                       </div>
                     </div>
                     <div className="space-y-2">
+<<<<<<< HEAD
                       <Label>رقم الحساب</Label>
+=======
+                      <Label>الرقم</Label>
+>>>>>>> 9f77d8f (first commit)
                       <div className="flex items-center gap-2">
                         <div className="p-2 bg-white rounded-md flex-1 font-mono">
                           {currentAccount.number}
@@ -499,6 +525,63 @@ export default function CustomerDepositInstructions() {
                 </div>
               </div>
             </TabsContent>
+<<<<<<< HEAD
+=======
+            
+            <TabsContent value="dzd" className="space-y-4 mt-4">
+              <div className="space-y-4">
+                <div className="bg-muted/30 p-4 rounded-md">
+                  <h3 className="font-medium mb-2">
+                    معلومات الحساب بالدينار الجزائري
+                  </h3>
+                  
+                  {/* BaridiMob Account Information */}
+                  <div className="mb-4 bg-primary/5 p-3 rounded-md border border-primary/20">
+                    <h4 className="font-medium mb-2">حساب الدينار الخاص بالبنك</h4>
+                    <div className="space-y-2">
+                      <Label>BaridiMob</Label>
+                      <div className="flex items-center gap-2">
+                        <div className="p-2 bg-white rounded-md flex-1 font-mono">
+                          Rip 007686...........
+                        </div>
+                        <Button
+                          variant="outline"
+                          size="icon"
+                          onClick={() =>
+                            handleCopyToClipboard(
+                              "Rip 007686...........",
+                              "baridimob"
+                            )
+                          }
+                        >
+                          {copiedField === "baridimob" ? (
+                            <Check className="h-4 w-4 text-success" />
+                          ) : (
+                            <Copy className="h-4 w-4" />
+                          )}
+                        </Button>
+                      </div>
+                      <p className="text-sm text-muted-foreground">
+                        الإيداع من 1 إلى 3 أيام عمل ليظهر في حسابك. اعتمادًا على البنك المرسل.
+                      </p>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="bg-warning/10 p-4 rounded-md border border-warning/20 flex items-start gap-2">
+                  <AlertCircle className="h-5 w-5 text-warning mt-0.5" />
+                  <div>
+                    <h3 className="font-medium text-warning">ملاحظة هامة</h3>
+                    <p className="text-sm">
+                      يرجى التأكد من إدخال المعلومات بشكل صحيح. قد تستغرق عملية
+                      الإيداع ما بين 1-3 أيام عمل لتظهر في حسابك، اعتمادًا على
+                      البنك المرسل.
+                    </p>
+                  </div>
+                </div>
+              </div>
+            </TabsContent>
+>>>>>>> 9f77d8f (first commit)
           </Tabs>
         </CardContent>
         <CardFooter className="flex justify-between">

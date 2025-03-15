@@ -1,4 +1,3 @@
-<<<<<<< HEAD
 import { useState } from "react";
 import {
   Dialog,
@@ -9,7 +8,6 @@ import {
   DialogTitle,
 } from "../ui/dialog";
 import { Button } from "../ui/button";
-import { Input } from "../ui/input";
 import { Label } from "../ui/label";
 import {
   Select,
@@ -20,54 +18,114 @@ import {
 } from "../ui/select";
 import { Checkbox } from "../ui/checkbox";
 import { CreditCard, DollarSign, Euro, PiggyBank, Shield } from "lucide-react";
-=======
-import NewAccountForm from "./NewAccountForm";
->>>>>>> 9f77d8f (first commit)
+import { supabase } from "@/lib/supabase";
+import { useToast } from "../ui/use-toast";
 
-interface OpenNewAccountProps {
+interface NewAccountFormProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   onSuccess?: () => void;
-<<<<<<< HEAD
-=======
   customerId?: number;
->>>>>>> 9f77d8f (first commit)
 }
 
-export default function OpenNewAccount({
+export default function NewAccountForm({
   open,
   onOpenChange,
   onSuccess,
-<<<<<<< HEAD
-}: OpenNewAccountProps) {
+  customerId = 1, // Default customer ID for testing
+}: NewAccountFormProps) {
   const [accountType, setAccountType] = useState("جاري");
   const [currency, setCurrency] = useState("دينار جزائري");
-  const [initialDeposit, setInitialDeposit] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [acceptTerms, setAcceptTerms] = useState(false);
+  const { toast } = useToast();
 
-  const handleSubmit = (e: React.FormEvent) => {
+  // Generate a random account number
+  const generateAccountNumber = () => {
+    const randomPart = () => Math.floor(1000 + Math.random() * 9000);
+    return `DZ59 ${randomPart()} ${randomPart()} ${randomPart()} ${randomPart()}`;
+  };
+
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+
     if (!acceptTerms) {
-      alert("يرجى الموافقة على الشروط والأحكام");
+      toast({
+        title: "خطأ",
+        description: "يرجى الموافقة على الشروط والأحكام",
+        variant: "destructive",
+      });
       return;
     }
 
     setIsLoading(true);
 
-    // محاكاة عملية فتح الحساب
-    setTimeout(() => {
-      setIsLoading(false);
-      onOpenChange(false);
+    try {
+      // Create account in Supabase
+      const accountNumber = generateAccountNumber();
 
-      // إظهار رسالة نجاح
-      alert(`تم فتح حساب ${accountType} بنجاح بعملة ${currency}`);
-
-      // استدعاء دالة النجاح إذا كانت موجودة
-      if (onSuccess) {
-        onSuccess();
+      // تحقق من وجود اتصال بقاعدة البيانات
+      if (!supabase) {
+        throw new Error("لا يمكن الاتصال بقاعدة البيانات");
       }
-    }, 1500);
+
+      console.log("Creating account with data:", {
+        customer_id: customerId,
+        account_number: accountNumber,
+        type: accountType,
+        currency: currency,
+        balance: 0,
+        status: "نشط",
+      });
+
+      const { data, error } = await supabase
+        .from("accounts")
+        .insert([
+          {
+            customer_id: customerId,
+            account_number: accountNumber,
+            type: accountType,
+            currency: currency,
+            balance: 0,
+            status: "نشط",
+          },
+        ])
+        .select();
+
+      if (error) {
+        console.error("Supabase insert error:", error);
+        throw error;
+      }
+
+      if (!data || data.length === 0) {
+        throw new Error("لم يتم إنشاء الحساب بشكل صحيح");
+      }
+
+      console.log("Account created successfully:", data);
+
+      toast({
+        title: "تم بنجاح",
+        description: `تم فتح حساب ${accountType} جديد بعملة ${currency}`,
+      });
+
+      // Reset form
+      setAccountType("جاري");
+      setCurrency("دينار جزائري");
+      setAcceptTerms(false);
+
+      // Close dialog and call success callback
+      onOpenChange(false);
+      if (onSuccess) onSuccess();
+    } catch (error) {
+      console.error("Error creating account:", error);
+      toast({
+        title: "خطأ",
+        description: "حدث خطأ أثناء فتح الحساب. يرجى المحاولة مرة أخرى.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   return (
@@ -76,7 +134,7 @@ export default function OpenNewAccount({
         <DialogHeader>
           <DialogTitle>فتح حساب جديد</DialogTitle>
           <DialogDescription>
-            أدخل المعلومات المطلوبة لفتح حساب جديد في بنك الأمان
+            أدخل بياناتك الشخصية لفتح حساب جديد
           </DialogDescription>
         </DialogHeader>
 
@@ -140,23 +198,6 @@ export default function OpenNewAccount({
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="initial-deposit">الإيداع الأولي</Label>
-            <div className="relative">
-              <Input
-                id="initial-deposit"
-                type="number"
-                placeholder="أدخل مبلغ الإيداع الأولي"
-                value={initialDeposit}
-                onChange={(e) => setInitialDeposit(e.target.value)}
-              />
-            </div>
-            <p className="text-xs text-muted-foreground">
-              الحد الأدنى للإيداع: 1,000 د.ج للحساب الجاري، 5,000 د.ج لحساب
-              التوفير، 10,000 د.ج لحساب الاستثمار
-            </p>
-          </div>
-
-          <div className="space-y-2">
             <Label htmlFor="purpose">الغرض من فتح الحساب</Label>
             <Select defaultValue="شخصي">
               <SelectTrigger id="purpose">
@@ -165,7 +206,6 @@ export default function OpenNewAccount({
               <SelectContent>
                 <SelectItem value="شخصي">استخدام شخصي</SelectItem>
                 <SelectItem value="تجاري">نشاط تجاري</SelectItem>
-                <SelectItem value="ادخار">ادخار</SelectItem>
                 <SelectItem value="استثمار">استثمار</SelectItem>
                 <SelectItem value="أخرى">أخرى</SelectItem>
               </SelectContent>
@@ -212,16 +252,5 @@ export default function OpenNewAccount({
         </form>
       </DialogContent>
     </Dialog>
-=======
-  customerId,
-}: OpenNewAccountProps) {
-  return (
-    <NewAccountForm
-      open={open}
-      onOpenChange={onOpenChange}
-      onSuccess={onSuccess}
-      customerId={customerId}
-    />
->>>>>>> 9f77d8f (first commit)
   );
 }

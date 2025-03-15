@@ -26,6 +26,7 @@ import {
 import { format } from "date-fns";
 import { ar } from "date-fns/locale";
 
+<<<<<<< HEAD
 const transactions = [
   {
     id: 1,
@@ -108,6 +109,10 @@ const transactions = [
     status: "مكتملة",
   },
 ];
+=======
+// Empty transactions array - all transactions have been removed
+const transactions = [];
+>>>>>>> 9f77d8f (first commit)
 
 export default function Transactions() {
   const [date, setDate] = useState<Date>();
@@ -193,6 +198,7 @@ export default function Transactions() {
             </div>
 
             <div className="divide-y">
+<<<<<<< HEAD
               {transactions.map((transaction) => (
                 <div
                   key={transaction.id}
@@ -225,18 +231,33 @@ export default function Transactions() {
                   </div>
                 </div>
               ))}
+=======
+              {transactions.length === 0 && (
+                <div className="p-8 text-center text-muted-foreground">
+                  لا توجد معاملات مالية لعرضها
+                </div>
+              )}
+>>>>>>> 9f77d8f (first commit)
             </div>
           </div>
 
           <div className="flex items-center justify-between mt-4">
             <div className="text-sm text-muted-foreground">
+<<<<<<< HEAD
               عرض 1-10 من 24 معاملة
+=======
+              لا توجد معاملات
+>>>>>>> 9f77d8f (first commit)
             </div>
             <div className="flex items-center space-x-2 space-x-reverse">
               <Button variant="outline" size="sm" disabled>
                 السابق
               </Button>
+<<<<<<< HEAD
               <Button variant="outline" size="sm">
+=======
+              <Button variant="outline" size="sm" disabled>
+>>>>>>> 9f77d8f (first commit)
                 التالي
               </Button>
             </div>

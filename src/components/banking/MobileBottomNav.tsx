@@ -4,8 +4,14 @@ import {
   CreditCard,
   BarChart3,
   Send,
+<<<<<<< HEAD
   PiggyBank,
   DollarSign,
+=======
+  DollarSign,
+  User,
+  Shield,
+>>>>>>> 9f77d8f (first commit)
 } from "lucide-react";
 
 const navItems = [
@@ -15,7 +21,10 @@ const navItems = [
   { icon: DollarSign, label: "العملات", href: "/bank/currencies" },
   { icon: Send, label: "التحويلات", href: "/bank/transfers" },
   { icon: BarChart3, label: "المعاملات", href: "/bank/transactions" },
+<<<<<<< HEAD
   { icon: PiggyBank, label: "الادخار", href: "/bank/savings" },
+=======
+>>>>>>> 9f77d8f (first commit)
 ];
 
 export default function MobileBottomNav() {
